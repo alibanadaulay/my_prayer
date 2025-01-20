@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
 import 'package:my_prayer/features/home/widget/prayer_item.dart';
+import 'package:my_prayer/utils/permission_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -53,13 +55,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget locationAndDateWidget() {
-    return Container(
+    return Consumer<HomeViewModel>(builder: (context, homeViewModel, child){
+      return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
         children: [
           InkWell(
-            onTap: () {
-              homeViewModel.setLocationName("Mampang, Jakarta Selatan");
+            onTap: () async {
+              final bool result = await PermissionUtils().requestPermission();
+              if(result){
+                homeViewModel.setLocationName("");
+              } else {  
+                Permission.location.onGrantedCallback((){
+                  homeViewModel.setLocationName("Mampang");
+                });
+                Permission.location.request();
+              }
             },
             child: Row(
               children: [
@@ -92,6 +103,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+    });
+    
   }
 
   Widget currentPrayerWidget() {

@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/home/home_page.dart';
+import 'package:my_prayer/features/search_city/search_city_viewmodel.dart';
+import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+
+void main() async{
+  await dotenv.load(fileName: ".env");
+
   runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => HomeViewModel())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer())),
+        ChangeNotifierProvider(create: (_) => SearchCityViewmodel())],
       child: const MyApp()));
 }
 

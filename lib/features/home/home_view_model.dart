@@ -2,17 +2,32 @@ import 'dart:async';
 import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/web.dart';
+import 'package:my_prayer/domain/adhnan/today_prayers.dart';
+import 'package:my_prayer/utils/permission_utils.dart';
+import 'package:geolocator/geolocator.dart';
+
+
 
 class HomeViewModel extends ChangeNotifier {
-  String locationName = "Pesanggrahan, Jakarta Selatan";
+  String locationName = "Pesanggrahan";
   String arabicDate = "28 Rabiul Awwal 1445 H";
   String date = "Senin , 28 Maret 2022";
   String remainingTime = "05:23";
   String timePrayer = "17:21";
   String currenPrayer = "Maghrib";
+  Coordinates _coordinates = Coordinates(-6.245945250734133,
+        106.82569952953673); // Replace with your own location lat, lng.
   int seconds = 0;
   Map<String, DateTime> todayPrayer = {};
   List<PrayerTime> prayerTimes = [];
+
+  final PermissionUtils _permissionUtils;
+  final GetTodayPrayer _todayPrayer;
+
+  HomeViewModel(this._permissionUtils, this._todayPrayer);
+
+
 
   void init() {
     getTodayPrayer();
@@ -20,15 +35,34 @@ class HomeViewModel extends ChangeNotifier {
     countDownPrayer();
   }
 
-  void setLocationName(String name) {
+  void setLocationName(String name) async{
+    Logger().i(name);
     if (name.isEmpty) {
-      locationName = "Mampang, Jakarta Selatan";
+      Position? result = await _permissionUtils.getCurrentPosition();
+      Logger().i(result);
+      if(result == null){
+        locationName = "Mampang";
+      } else {
+        
+        _coordinates = Coordinates(result.latitude, result.longitude);
+        locationName  = await _permissionUtils.getCityName(result) ?? "empty";
+      }
       notifyListeners();
+      getTodayPrayer();
+      getNextPrayer();
       return;
     }
     locationName = name;
+    Logger().i(locationName);
     notifyListeners();
   }
+
+  Future<void> _todayPrayerCloud(Position position) async {
+    DateTime now = DateTime.now();
+    final date = DateFormat('DD-MM-YYYY ').format(now);
+    final result = await _todayPrayer.getTodayPrayer(position, date);
+    prayerTimes.clear();
+    }
 
   void countDownPrayer() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -63,11 +97,9 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void getTodayPrayer() {
-    final myCoordinates = Coordinates(-6.245945250734133,
-        106.82569952953673); // Replace with your own location lat, lng.
     final params = CalculationMethod.umm_al_qura.getParameters();
     params.madhab = Madhab.shafi;
-    final prayerTimes = PrayerTimes.today(myCoordinates, params);
+    final prayerTimes = PrayerTimes.today(_coordinates, params);
 
     todayPrayer["Subuh"] = prayerTimes.fajr;
     todayPrayer["Sunrise"] = prayerTimes.sunrise;
