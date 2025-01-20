@@ -3,35 +3,43 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:my_prayer/model/json/prayer_time_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
+import 'package:my_prayer/utils/connection_utils.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/web.dart';
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 
 class GetTodayPrayer{
 
   final Dio _dio = Dio();
   final PermissionUtils _permissionUtils = PermissionUtils();
+  final ConnectionUtils connectionUtil = ConnectionUtils();
+
   Position? _position;
   String _date = "";
   String _country = "";
   String _isoCoutry = "";
 
 
-  Future<List<PrayerTimeModel>?> getTodayPrayer(String country, String isCountryCode) async{
+  Future<List<PrayerTimeModel>> getTodayPrayer(String country, String isCountryCode) async{
     Position? position = await _permissionUtils.getCurrentPosition();
     if(position == null){
-      return null;
+      return [];
     }
     _position = position;
     _date = DateFormat('DD-MM-YYYY ').format(DateTime.now());
     _country = country;
     _isoCoutry = isCountryCode;
 
-    // return _getPrayersFromLocal();
-    return _getPrayersFromRemote();
+
+    if(await connectionUtil.getConnection()){
+      return _getPrayersFromRemote();
+    } else {
+      return _getPrayersFromLocal();
+    }
+  
   } 
 
   Future<List<PrayerTimeModel>> _getPrayersFromLocal() async{
@@ -43,7 +51,6 @@ class GetTodayPrayer{
       params.madhab = Madhab.shafi;
       final prayerTimes = PrayerTimes.today(Coordinates(_position!.latitude, _position!.longitude), params);
 
-
     todayPrayer["Subuh"] = prayerTimes.fajr;
     todayPrayer["Sunrise"] = prayerTimes.sunrise;
     todayPrayer["Dzuhur"] = prayerTimes.dhuhr;
@@ -53,7 +60,7 @@ class GetTodayPrayer{
 
 
      for (var entry in todayPrayer.entries) {
-      if(isNextPrayerFound == false){
+      if(!isNextPrayerFound){
         isNextPrayerFound = entry.value.isAfter(DateTime.now());
       }
 

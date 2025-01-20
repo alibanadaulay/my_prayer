@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
+import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,7 @@ void main() async{
 
   runApp(MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer()))],
+        ChangeNotifierProvider(create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(), GetCurrentPrayerUseCases()))],
       child: const MyApp()));
 }
 

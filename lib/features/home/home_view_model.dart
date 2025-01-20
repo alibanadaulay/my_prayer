@@ -3,6 +3,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
+import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
@@ -16,7 +17,7 @@ class HomeViewModel extends ChangeNotifier {
   String date = "Senin , 28 Maret 2022";
   String remainingTime = "05:23";
   String timePrayer = "17:21";
-  String currenPrayer = "Maghrib";
+  String currenPrayer = "-";
   int seconds = 0;
   List<PrayerTimeModel> prayerTimes = [];
   String? _isoCountryCode = "";
@@ -25,8 +26,9 @@ class HomeViewModel extends ChangeNotifier {
 
   final PermissionUtils _permissionUtils;
   final GetTodayPrayer _todayPrayer;
+  final GetCurrentPrayerUseCases _currentPrayer;
 
-  HomeViewModel(this._permissionUtils, this._todayPrayer);
+  HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer);
 
 
 
@@ -34,20 +36,29 @@ class HomeViewModel extends ChangeNotifier {
     Logger().i("init called");
    
 
-    arabicDate = HijriCalendar.now().toFormat("dd MM yyyy");
+    arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
     await _setLocationName("");
     await _getTodayPrayer();
+    await _getCurrentPrayer();
 
     countDownPrayer();
   }
 
   Future<void> _getTodayPrayer() async {
-  List<PrayerTimeModel>? temp = await _todayPrayer.getTodayPrayer(locationName,  _isoCountryCode ?? "-");
-   if(temp != null){
-      prayerTimes = temp;
+    try {
+      prayerTimes = await _todayPrayer.getTodayPrayer(locationName,  _isoCountryCode ?? "-");
       notifyListeners();
-   }
-  Logger().d(temp);
+      // _getCurrentPrayer();
+    } catch (e){
+
+    }
+  }
+
+  Future<void> _getCurrentPrayer() async{
+    PrayerTimeModel result =  await _currentPrayer.getCurrentPrayer(prayerTimes);
+    currenPrayer = result.name;
+    timePrayer = result.time;
+    notifyListeners();
   }
 
   void setNewLocation(String name){

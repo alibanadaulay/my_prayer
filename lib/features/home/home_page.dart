@@ -48,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget header() {
     return Container(
+      height: MediaQuery.of(context).size.height * 0.3,
       color: Colors.blueAccent,
       child: Column(
         children: [locationAndDateWidget(), currentPrayerWidget()],
@@ -59,7 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return Consumer<HomeViewModel>(builder: (context, homeViewModel, child){
       return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
             onTap: () async {
@@ -78,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const FaIcon(
                   FontAwesomeIcons.locationDot,
                   color: Colors.white54,
-                  size: 20.0,
+                  size: 24.0,
                 ),
                 const SizedBox(
                   width: 8.0,
@@ -89,18 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          const Spacer(
-            flex: 1,
+          Container(
+            padding: EdgeInsets.only(top: 8.0, left: 24.0),
+            child:dateText(homeViewModel.arabicDate, textStyle: TextStyle(fontSize: 20)),
           ),
-          Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                dateText(homeViewModel.arabicDate),
-                dateText(homeViewModel.date,
-                    textStyle:
-                        const TextStyle(fontSize: 12, color: Colors.white)),
-              ])
         ],
       ),
     );
@@ -111,7 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget currentPrayerWidget() {
     return Consumer<HomeViewModel>(
       builder: (context, homeViewModel, child) {
-        return Column(
+        return Container(
+          padding: EdgeInsets.only(top: 16.0),
+          child: Column(
           children: [
             RichText(
                 text: TextSpan(
@@ -121,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(homeViewModel.timePrayer),
             Text(homeViewModel.remainingTime),
           ],
+        ),
         );
       },
     );
@@ -155,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
         text: value,
         style: textStyle ??
             const TextStyle(
-                fontSize: 14.0,
+                fontSize: 24.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
       ),
