@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
 import 'package:my_prayer/features/home/widget/prayer_item.dart';
+import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -64,10 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
             onTap: () async {
               final bool result = await PermissionUtils().requestPermission();
               if(result){
-                homeViewModel.setLocationName("");
+                homeViewModel.setNewLocation("");
               } else {  
                 Permission.location.onGrantedCallback((){
-                  homeViewModel.setLocationName("Mampang");
+                  homeViewModel.setNewLocation("Mampang");
                 });
                 Permission.location.request();
               }
@@ -133,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
             shrinkWrap: true,
             itemCount: homeViewModel.prayerTimes.length,
             itemBuilder: (context, index) {
-              PrayerTime item = homeViewModel.prayerTimes[index];
+              PrayerTimeModel item = homeViewModel.prayerTimes[index];
               return PrayerItem(
                 key: Key("$index"),
                 name: item.name,

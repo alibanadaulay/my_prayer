@@ -46,15 +46,14 @@ class PermissionUtils {
    
   }
 
-  Future<String?> getCityName(Position? position) async {
+  Future<Placemark?> getCityName(Position? position) async {
     try{
     if(position == null){
       return null;
     }
         List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
  if (placemarks.isNotEmpty) {
-      String city = placemarks[0].locality ?? 'Unknown';
-      return city;
+  return placemarks[0];
     } else {
             return null;
     }
