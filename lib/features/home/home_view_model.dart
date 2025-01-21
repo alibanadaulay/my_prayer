@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
+import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -27,8 +30,10 @@ class HomeViewModel extends ChangeNotifier {
   final PermissionUtils _permissionUtils;
   final GetTodayPrayer _todayPrayer;
   final GetCurrentPrayerUseCases _currentPrayer;
+  final NotificationServive _notificationServive;
 
-  HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer);
+  HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer,
+      this._notificationServive);
 
   void init() async {
     arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
@@ -62,6 +67,20 @@ class HomeViewModel extends ChangeNotifier {
     currenPrayer = result.name;
     timePrayer = result.time;
     notifyListeners();
+
+    List<String> parts = timePrayer.split(':');
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
+    final DateTime now = DateTime.now();
+
+    DateTime targetTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      15,
+      25,
+    );
+    _notificationServive.scheduleAlarm(targetTime, 104, result.name);
   }
 
   void setNewLocation() {

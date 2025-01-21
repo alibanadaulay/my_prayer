@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
+import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
-void main() async{
+void main() async {
   // await dotenv.load(fileName: "assets/.env");
+  WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(), GetCurrentPrayerUseCases()))],
-      child: const MyApp()));
+  NotificationServive notificationServive = NotificationServive();
+  notificationServive.initialize();
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(
+        create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(),
+            GetCurrentPrayerUseCases(), notificationServive))
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

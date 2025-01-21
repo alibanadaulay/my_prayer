@@ -1,10 +1,14 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:logger/logger.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-class NotificationServive{
-    static final FlutterLocalNotificationsPlugin _notificationsPlugin =
+class NotificationServive {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
+    tz.initializeTimeZones();
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -17,34 +21,52 @@ class NotificationServive{
       iOS: iosInitializationSettings,
     );
 
-    await _notificationsPlugin.initialize(initializationSettings);
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        Logger().i("Receiver Notification ${details.id}");
+      },
+      onDidReceiveBackgroundNotificationResponse: (details) {
+        Logger().i("Receiver Notification ${details.id}");
+      },
+    );
   }
 
+  Future<void> scheduleAlarm(
+      DateTime scheduledTime, int id, String title) async {
+    final List<PendingNotificationRequest> pendingNotifications =
+        await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
-  static Future<void> showNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    const AndroidNotificationDetails androidDetails =
+    for (var notification in pendingNotifications) {
+      if (notification.id == id) {
+        Logger().d("notificationId is found ${notification.id}");
+        return;
+      }
+    }
+    Logger().d("schedule Alaram ${id}");
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'your_channel_id',
-      'your_channel_name',
-      channelDescription: 'your_channel_description',
-      importance: Importance.high,
+      'prayer_notification_id',
+      'Alarm Notifications',
+      channelDescription: 'Channel for alarm notifications',
+      importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(),
-    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await _notificationsPlugin.show(
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
-      body,
-      notificationDetails,
+      "Sudah masuk waktu $title",
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 }

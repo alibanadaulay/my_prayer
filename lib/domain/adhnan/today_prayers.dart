@@ -10,9 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:logger/web.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-
-class GetTodayPrayer{
-
+class GetTodayPrayer {
   final Dio _dio = Dio();
   final PermissionUtils _permissionUtils = PermissionUtils();
   final ConnectionUtils connectionUtil = ConnectionUtils();
@@ -22,10 +20,10 @@ class GetTodayPrayer{
   String _country = "";
   String _isoCoutry = "";
 
-
-  Future<List<PrayerTimeModel>> getTodayPrayer(String country, String isCountryCode) async{
+  Future<List<PrayerTimeModel>> getTodayPrayer(
+      String country, String isCountryCode) async {
     Position? position = await _permissionUtils.getCurrentPosition();
-    if(position == null){
+    if (position == null) {
       return [];
     }
     _position = position;
@@ -33,23 +31,22 @@ class GetTodayPrayer{
     _country = country;
     _isoCoutry = isCountryCode;
 
-
-    if(await connectionUtil.getConnection()){
+    if (await connectionUtil.getConnection()) {
       return _getPrayersFromRemote();
     } else {
       return _getPrayersFromLocal();
     }
-  
-  } 
+  }
 
-  Future<List<PrayerTimeModel>> _getPrayersFromLocal() async{
-      Map<String, DateTime> todayPrayer = {};
-      List<PrayerTimeModel> list = [];
-      bool isNextPrayerFound = false;
+  Future<List<PrayerTimeModel>> _getPrayersFromLocal() async {
+    Map<String, DateTime> todayPrayer = {};
+    List<PrayerTimeModel> list = [];
+    bool isNextPrayerFound = false;
 
-      final params = CalculationMethod.umm_al_qura.getParameters();
-      params.madhab = Madhab.shafi;
-      final prayerTimes = PrayerTimes.today(Coordinates(_position!.latitude, _position!.longitude), params);
+    final params = CalculationMethod.umm_al_qura.getParameters();
+    params.madhab = Madhab.shafi;
+    final prayerTimes = PrayerTimes.today(
+        Coordinates(_position!.latitude, _position!.longitude), params);
 
     todayPrayer["Subuh"] = prayerTimes.fajr;
     todayPrayer["Sunrise"] = prayerTimes.sunrise;
@@ -58,38 +55,46 @@ class GetTodayPrayer{
     todayPrayer["Maghrib"] = prayerTimes.maghrib;
     todayPrayer["Isha"] = prayerTimes.isha;
 
-
-     for (var entry in todayPrayer.entries) {
-      if(!isNextPrayerFound){
+    int i = 0;
+    for (var entry in todayPrayer.entries) {
+      if (!isNextPrayerFound) {
         isNextPrayerFound = entry.value.isAfter(DateTime.now());
       }
 
       list.add(PrayerTimeModel(
+          id: i,
           name: entry.key,
           time: DateFormat('HH:mm').format(entry.value),
           isNextPrayer: isNextPrayerFound));
+      i++;
     }
     return list;
   }
 
-  Future<List<PrayerTimeModel>> _getPrayersFromRemote( ) async{
+  Future<List<PrayerTimeModel>> _getPrayersFromRemote() async {
     List<PrayerTimeModel> list = [];
     String baseUrl = "https://api.aladhan.com/v1";
-    String adhanUrl = "$baseUrl/timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=3&shafaq=general";
-    final  response  = await _dio.get(adhanUrl);
-    PrayerTimesResponse prayerTime = PrayerTimesResponse.fromJson(response.data);
+    String adhanUrl =
+        "$baseUrl/timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=3&shafaq=general";
+    final response = await _dio.get(adhanUrl);
+    PrayerTimesResponse prayerTime =
+        PrayerTimesResponse.fromJson(response.data);
 
     Logger().d(adhanUrl);
 
-    list.add(PrayerTimeModel(name: "Subuh", time: prayerTime.data.timings.Fajr));
-    list.add(PrayerTimeModel(name: "Sunrise", time: prayerTime.data.timings.Sunrise));
-    list.add(PrayerTimeModel(name: "Dzuhur", time: prayerTime.data.timings.Dhuhr));
-    list.add(PrayerTimeModel(name: "Ashar", time: prayerTime.data.timings.Asr));
-    list.add(PrayerTimeModel(name: "Maghrib", time: prayerTime.data.timings.Maghrib));
-    list.add(PrayerTimeModel(name: "Isha", time: prayerTime.data.timings.Isha));
-    Logger().d(list);
+    list.add(PrayerTimeModel(
+        id: 0, name: "Subuh", time: prayerTime.data.timings.Fajr));
+    list.add(PrayerTimeModel(
+        id: 1, name: "Sunrise", time: prayerTime.data.timings.Sunrise));
+    list.add(PrayerTimeModel(
+        id: 2, name: "Dzuhur", time: prayerTime.data.timings.Dhuhr));
+    list.add(PrayerTimeModel(
+        id: 3, name: "Ashar", time: prayerTime.data.timings.Asr));
+    list.add(PrayerTimeModel(
+        id: 4, name: "Maghrib", time: prayerTime.data.timings.Maghrib));
+    list.add(PrayerTimeModel(
+        id: 5, name: "Isha", time: prayerTime.data.timings.Isha));
 
     return list;
   }
-  
 }
