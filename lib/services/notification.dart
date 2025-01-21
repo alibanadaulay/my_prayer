@@ -43,7 +43,7 @@ class NotificationServive {
         return;
       }
     }
-    Logger().d("schedule Alaram ${id}");
+    Logger().d("schedule Alaram $id");
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
@@ -58,6 +58,7 @@ class NotificationServive {
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
+    Logger().i(scheduledTime.millisecondsSinceEpoch);
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,

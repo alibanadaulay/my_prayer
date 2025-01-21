@@ -200,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
         text: value,
         style: textStyle ??
             const TextStyle(
-                fontSize: 24.0,
+                fontSize: 18.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
       ),

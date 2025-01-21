@@ -8,6 +8,10 @@ class GetCurrentPrayerUseCases {
     TimeOfDay now = TimeOfDay.now();
     Logger().d(now);
 
+    if (prayers.isEmpty) {
+      return PrayerTimeModel(id: 0, name: "Subuh", time: "05:00");
+    }
+
     for (int i = 0; i < 5; i++) {
       PrayerTimeModel targetTime = prayers[i];
       TimeOfDay target = TimeOfDay(

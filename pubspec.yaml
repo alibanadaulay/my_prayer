@@ -50,6 +50,7 @@ dependencies:
   json_annotation: ^4.9.0
   connectivity_plus: ^6.1.2
   hijri: ^3.0.0
+  home_widget: ^0.7.0
   shimmer_animation: ^2.2.2
 
 dev_dependencies:

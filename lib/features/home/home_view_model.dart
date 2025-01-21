@@ -23,6 +23,7 @@ class HomeViewModel extends ChangeNotifier {
   List<PrayerTimeModel> prayerTimes = [];
   String? _isoCountryCode = "";
   Placemark? _placemark;
+  Timer? _remainingTimeTimer;
 
   ViewState _prayerListState = ViewState.idle;
   ViewState get prayerListState => _prayerListState;
@@ -68,18 +69,9 @@ class HomeViewModel extends ChangeNotifier {
     timePrayer = result.time;
     notifyListeners();
 
-    List<String> parts = timePrayer.split(':');
-    int hours = int.parse(parts[0]);
-    int minutes = int.parse(parts[1]);
-    final DateTime now = DateTime.now();
+    DateTime targetTime =
+        await _getTargetTime(result.name == "Subuh", timePrayer);
 
-    DateTime targetTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      hours,
-      minutes,
-    );
     _notificationServive.scheduleAlarm(targetTime, result.id, result.name);
   }
 
@@ -104,30 +96,48 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> _getPlaceMark(Position position) async {
     _placemark = await _permissionUtils.getCityName(position);
-    locationName = _placemark!.locality ?? "";
-    _isoCountryCode = _placemark!.isoCountryCode;
+    if (_placemark != null) {
+      locationName = _placemark!.locality ?? "";
+      _isoCountryCode = _placemark!.isoCountryCode;
+    }
   }
 
   Future<void> _calculateCurrentTimeWithPrayerTime() async {
-    List<String> parts = timePrayer.split(':');
-    int hours = int.parse(parts[0]);
-    int minutes = int.parse(parts[1]);
-
     final DateTime now = DateTime.now();
 
-    DateTime targetTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      hours,
-      minutes,
-    );
+    DateTime targetTime =
+        await _getTargetTime(currenPrayer == "Subuh", timePrayer);
 
     seconds = targetTime.difference(now).inSeconds;
   }
 
+  Future<DateTime> _getTargetTime(bool isFajr, String hourMinute) async {
+    final DateTime now = DateTime.now();
+
+    List<String> parts = hourMinute.split(':');
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
+    int nextDay = 0;
+    if (isFajr) {
+      nextDay = 1;
+    }
+
+    DateTime targetTime = DateTime(
+      now.year,
+      now.month,
+      now.day + nextDay,
+      hours,
+      minutes,
+    );
+
+    return targetTime;
+  }
+
   void _countDownPrayer() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (_remainingTimeTimer?.isActive == true) {
+      return;
+    }
+    _remainingTimeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       seconds--;
       if (seconds < 0) {
         timer.cancel();
