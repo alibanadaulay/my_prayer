@@ -77,10 +77,10 @@ class HomeViewModel extends ChangeNotifier {
       now.year,
       now.month,
       now.day,
-      15,
-      25,
+      hours,
+      minutes,
     );
-    _notificationServive.scheduleAlarm(targetTime, 104, result.name);
+    _notificationServive.scheduleAlarm(targetTime, result.id, result.name);
   }
 
   void setNewLocation() {
