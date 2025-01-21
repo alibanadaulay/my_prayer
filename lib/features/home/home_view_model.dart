@@ -2,27 +2,27 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/web.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
+import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
-
-
 
 class HomeViewModel extends ChangeNotifier {
   String locationName = " ";
   String arabicDate = "28 Rabiul Awwal 1445 H";
   String date = "Senin , 28 Maret 2022";
-  String remainingTime = "05:23";
-  String timePrayer = "17:21";
+  String remainingTime = "00:00:00";
+  String timePrayer = "-";
   String currenPrayer = "-";
   int seconds = 0;
   List<PrayerTimeModel> prayerTimes = [];
   String? _isoCountryCode = "";
   Placemark? _placemark;
 
+  ViewState _prayerListState = ViewState.idle;
+  ViewState get prayerListState => _prayerListState;
 
   final PermissionUtils _permissionUtils;
   final GetTodayPrayer _todayPrayer;
@@ -30,49 +30,51 @@ class HomeViewModel extends ChangeNotifier {
 
   HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer);
 
-
-
   void init() async {
-    Logger().i("init called");
-   
-
     arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
-    await _setLocationName("");
-    await _getTodayPrayer();
-    await _getCurrentPrayer();
-
-    countDownPrayer();
+    _setupPrayer();
   }
 
   Future<void> _getTodayPrayer() async {
+    _prayerListState = ViewState.loading;
+    notifyListeners();
     try {
-      prayerTimes = await _todayPrayer.getTodayPrayer(locationName,  _isoCountryCode ?? "-");
+      prayerTimes = await _todayPrayer.getTodayPrayer(
+          locationName, _isoCountryCode ?? "-");
+      _prayerListState = ViewState.success;
       notifyListeners();
-      // _getCurrentPrayer();
-    } catch (e){
-
+    } catch (e) {
+      _prayerListState = ViewState.error;
     }
   }
 
-  Future<void> _getCurrentPrayer() async{
-    PrayerTimeModel result =  await _currentPrayer.getCurrentPrayer(prayerTimes);
+  void _setupPrayer() async {
+    await _setLocationName("");
+    await _getTodayPrayer();
+    await _getCurrentPrayer();
+    await _calculateCurrentTimeWithPrayerTime();
+
+    _countDownPrayer();
+  }
+
+  Future<void> _getCurrentPrayer() async {
+    PrayerTimeModel result = await _currentPrayer.getCurrentPrayer(prayerTimes);
     currenPrayer = result.name;
     timePrayer = result.time;
     notifyListeners();
   }
 
-  void setNewLocation(String name){
-    _setLocationName(name);
+  void setNewLocation() {
+    _setupPrayer();
   }
 
-  Future<void> _setLocationName(String name) async{
+  Future<void> _setLocationName(String name) async {
     if (name.isEmpty) {
       Position? result = await _permissionUtils.getCurrentPosition();
-      Logger().i(result);
-      if(result == null){
+      if (result == null) {
         locationName = "Mampang";
       } else {
-          await _getPlaceMark(result);
+        await _getPlaceMark(result);
       }
       notifyListeners();
       return;
@@ -82,36 +84,43 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> _getPlaceMark(Position position) async {
-    _placemark =  await _permissionUtils.getCityName(position);
+    _placemark = await _permissionUtils.getCityName(position);
     locationName = _placemark!.locality ?? "";
     _isoCountryCode = _placemark!.isoCountryCode;
   }
 
+  Future<void> _calculateCurrentTimeWithPrayerTime() async {
+    List<String> parts = timePrayer.split(':');
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
 
-  void countDownPrayer() {
+    final DateTime now = DateTime.now();
+
+    DateTime targetTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      hours,
+      minutes,
+    );
+
+    seconds = targetTime.difference(now).inSeconds;
+  }
+
+  void _countDownPrayer() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
       seconds--;
       if (seconds < 0) {
         timer.cancel();
-        countDownPrayer();
+        _countDownPrayer();
       } else {
-        remainingTime = formatSecondsToHHMM(seconds);
+        remainingTime = _formatSecondsToHHMM(seconds);
         notifyListeners();
       }
     });
   }
 
-  int calculateSecondsToTargetTime(DateTime prayer) {
-    final now = DateTime.now(); // Get the current time
-    return prayer.difference(now).inSeconds;
-  }
-
-  DateTime getSecondFromPrayerTime(int hour, int minute, int second) {
-    DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, hour, minute, second);
-  }
-
-  String formatSecondsToHHMM(int seconds) {
+  String _formatSecondsToHHMM(int seconds) {
     final duration = Duration(seconds: seconds);
     final hours = duration.inHours.toString().padLeft(2, '0');
     final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');

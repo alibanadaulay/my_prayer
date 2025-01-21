@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
 import 'package:my_prayer/features/home/widget/prayer_item.dart';
+import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -32,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Container(
-          color: Colors.black38,
+          color: Colors.white38,
           child: body(),
         ),
       ),
@@ -42,13 +44,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget body() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[header(), todayPrayerWidget()],
+      children: <Widget>[_header(), _todayPrayerWidget()],
     );
   }
 
-  Widget header() {
+  Widget _header() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.3,
+      height: MediaQuery.of(context).size.height * 0.25,
       color: Colors.blueAccent,
       child: Column(
         children: [locationAndDateWidget(), currentPrayerWidget()],
@@ -57,50 +59,50 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget locationAndDateWidget() {
-    return Consumer<HomeViewModel>(builder: (context, homeViewModel, child){
+    return Consumer<HomeViewModel>(builder: (context, homeViewModel, child) {
       return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () async {
-              final bool result = await PermissionUtils().requestPermission();
-              if(result){
-                homeViewModel.setNewLocation("");
-              } else {  
-                Permission.location.onGrantedCallback((){
-                  homeViewModel.setNewLocation("Mampang");
-                });
-                Permission.location.request();
-              }
-            },
-            child: Row(
-              children: [
-                const FaIcon(
-                  FontAwesomeIcons.locationDot,
-                  color: Colors.white54,
-                  size: 24.0,
-                ),
-                const SizedBox(
-                  width: 8.0,
-                ),
-                dateText(
-                  homeViewModel.locationName,
-                ),
-              ],
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () async {
+                final bool result = await PermissionUtils().requestPermission();
+                if (result) {
+                  homeViewModel.setNewLocation();
+                } else {
+                  Permission.location.onGrantedCallback(() {
+                    homeViewModel.setNewLocation();
+                  });
+                  Permission.location.request();
+                }
+              },
+              child: Row(
+                children: [
+                  const FaIcon(
+                    FontAwesomeIcons.locationDot,
+                    color: Colors.white54,
+                    size: 24.0,
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  dateText(
+                    homeViewModel.locationName,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 8.0, left: 24.0),
-            child:dateText(homeViewModel.arabicDate, textStyle: TextStyle(fontSize: 20)),
-          ),
-        ],
-      ),
-    );
+            Container(
+              padding: EdgeInsets.only(top: 8.0, left: 24.0),
+              child: dateText(homeViewModel.arabicDate,
+                  textStyle: TextStyle(fontSize: 20)),
+            ),
+          ],
+        ),
+      );
     });
-    
   }
 
   Widget currentPrayerWidget() {
@@ -109,39 +111,84 @@ class _MyHomePageState extends State<MyHomePage> {
         return Container(
           padding: EdgeInsets.only(top: 16.0),
           child: Column(
-          children: [
-            RichText(
+            children: [
+              RichText(
                 text: TextSpan(
-                    text: homeViewModel.currenPrayer,
-                    style:
-                        const TextStyle(fontSize: 24.0, color: Colors.white))),
-            Text(homeViewModel.timePrayer),
-            Text(homeViewModel.remainingTime),
-          ],
-        ),
+                  text: homeViewModel.currenPrayer,
+                  style: const TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white70),
+                ),
+              ),
+              SizedBox(
+                height: 8.0,
+              ),
+              dateText(homeViewModel.timePrayer),
+              SizedBox(
+                height: 16.0,
+              ),
+              dateText(homeViewModel.remainingTime),
+            ],
+          ),
         );
       },
     );
   }
 
-  Widget todayPrayerWidget() {
+  Widget _todayPrayerWidget() {
     return Consumer<HomeViewModel>(
       builder: (context, homeViewModel, child) {
-        return Container(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: homeViewModel.prayerTimes.length,
-            itemBuilder: (context, index) {
-              PrayerTimeModel item = homeViewModel.prayerTimes[index];
-              return PrayerItem(
-                key: Key("$index"),
-                name: item.name,
-                time: item.time,
-                isNextPrayer: item.isNextPrayer,
-              );
-            },
-          ),
-        );
+        switch (homeViewModel.prayerListState) {
+          case ViewState.loading:
+            return Column(children: [
+              Shimmer(
+                duration: const Duration(seconds: 3),
+                interval: const Duration(seconds: 1),
+                color: Colors.white,
+                colorOpacity: 0.3,
+                enabled: true,
+                direction: const ShimmerDirection.fromLTRB(),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 48,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(
+                height: 16.0,
+              ),
+              Shimmer(
+                duration: const Duration(seconds: 3),
+                interval: const Duration(seconds: 1),
+                color: Colors.white,
+                colorOpacity: 0.3,
+                enabled: true,
+                direction: const ShimmerDirection.fromLTRB(),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 48,
+                  color: Colors.grey,
+                ),
+              ),
+            ]);
+          default:
+            return Container(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: homeViewModel.prayerTimes.length,
+                itemBuilder: (context, index) {
+                  PrayerTimeModel item = homeViewModel.prayerTimes[index];
+                  return PrayerItem(
+                    key: Key("$index"),
+                    name: item.name,
+                    time: item.time,
+                    isNextPrayer: item.isNextPrayer,
+                  );
+                },
+              ),
+            );
+        }
       },
     );
   }
@@ -153,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
         text: value,
         style: textStyle ??
             const TextStyle(
-                fontSize: 24.0,
+                fontSize: 20.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
       ),

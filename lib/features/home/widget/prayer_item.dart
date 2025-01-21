@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PrayerItem extends StatelessWidget {
   final String name;
@@ -14,32 +15,46 @@ class PrayerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      onTap: () {},
+      child: Card(
+        margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         color: isNextPrayer ? Colors.blueAccent : Colors.black38,
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: content(),
+              child: _content(),
             ),
-            Divider(color: isNextPrayer ? Colors.white : Colors.white54),
           ],
-        ));
+        ),
+      ),
+    );
   }
 
-  Widget content() {
-    return Row(children: [
-      Text(
-        name,
-        style: const TextStyle(color: Colors.white, fontSize: 24.0),
-      ),
-      const Spacer(
-        flex: 1,
-      ),
-      Text(
-        time,
-        style: const TextStyle(color: Colors.white, fontSize: 24.0),
-      )
-    ]);
+  Widget _content() {
+    return Row(
+      children: [
+        FaIcon(
+          FontAwesomeIcons.clock,
+          color: Colors.white54,
+          size: 24.0,
+        ),
+        SizedBox(
+          width: 8,
+        ),
+        Text(
+          name,
+          style: const TextStyle(color: Colors.white, fontSize: 24.0),
+        ),
+        const Spacer(
+          flex: 1,
+        ),
+        Text(
+          time,
+          style: const TextStyle(color: Colors.white, fontSize: 24.0),
+        )
+      ],
+    );
   }
 }
