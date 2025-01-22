@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +71,8 @@ class HomeViewModel extends ChangeNotifier {
     DateTime targetTime =
         await _getTargetTime(result.name == "Subuh", timePrayer);
 
-    _notificationServive.scheduleAlarm(targetTime, result.id, result.name);
+    _notificationServive.scheduleAlarm(
+        targetTime, result.id, result.name, _isoCountryCode ?? "ID");
   }
 
   void setNewLocation() {
@@ -126,16 +126,17 @@ class HomeViewModel extends ChangeNotifier {
       now.year,
       now.month,
       now.day + nextDay,
-      hours,
-      minutes,
+      12,
+      0,
     );
 
     return targetTime;
   }
 
   void _countDownPrayer() {
-    if (_remainingTimeTimer?.isActive == true) {
-      return;
+    if (_remainingTimeTimer != null && _remainingTimeTimer?.isActive == true) {
+      _remainingTimeTimer!.cancel();
+      _remainingTimeTimer = null;
     }
     _remainingTimeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       seconds--;

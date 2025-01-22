@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:my_prayer/model/json/prayer_time_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
@@ -8,7 +7,6 @@ import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/web.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 class GetTodayPrayer {
   final Dio _dio = Dio();
