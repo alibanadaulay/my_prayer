@@ -62,12 +62,6 @@ class NotificationServive {
             playSound: true,
             icon: "@drawable/app_icon");
 
-    // _flutterLocalNotificationsPlugin
-    //     .resolvePlatformSpecificImplementation<
-    //         AndroidFlutterLocalNotificationsPlugin>()!
-    //     .startForegroundService(
-    //         1, 'Foreground service is running', 'Foreground service',
-    //         notificationDetails: androidPlatformChannelSpecifics);
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
     var time =

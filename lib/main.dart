@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_prayer/common/adhan_dio.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
@@ -14,9 +15,11 @@ void main() async {
   NotificationServive notificationServive = NotificationServive();
   notificationServive.initialize();
 
+  AdhanClientDio _adhan = AdhanClientDio();
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
-        create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(),
+        create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(_adhan),
             GetCurrentPrayerUseCases(), notificationServive))
   ], child: const MyApp()));
 }
