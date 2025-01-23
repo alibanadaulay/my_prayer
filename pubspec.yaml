@@ -53,10 +53,13 @@ dependencies:
   hijri: ^3.0.0
   home_widget: ^0.7.0
   shimmer_animation: ^2.2.2
+  hive_ce: ^2.9.0
+  hive_ce_flutter: ^2.1.0
 
 dev_dependencies:
   build_runner: ^2.4.14
   json_serializable: ^6.9.3
+  hive_ce_generator: ^1.8.0
 
   flutter_test:
     sdk: flutter

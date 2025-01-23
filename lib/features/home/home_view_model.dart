@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
@@ -126,8 +125,8 @@ class HomeViewModel extends ChangeNotifier {
       now.year,
       now.month,
       now.day + nextDay,
-      12,
-      0,
+      hours,
+      minutes,
     );
 
     return targetTime;

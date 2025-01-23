@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
 import 'package:my_prayer/model/json/prayer_time_response.dart';
@@ -75,7 +74,7 @@ class GetTodayPrayer {
   Future<List<PrayerTimeModel>> _getPrayersFromRemote() async {
     List<PrayerTimeModel> list = [];
     String adhanUrl =
-        "timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=3&shafaq=general";
+        "timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=20&shafaq=general";
     final response = await _adhanClientDio.dio.get(adhanUrl);
     PrayerTimesResponse prayerTime =
         PrayerTimesResponse.fromJson(response.data);

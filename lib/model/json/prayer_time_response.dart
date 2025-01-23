@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'prayer_time_response.g.dart'; 
+part 'prayer_time_response.g.dart';
 
 @JsonSerializable()
 class PrayerTimesResponse {
@@ -8,15 +8,18 @@ class PrayerTimesResponse {
   final String status;
   final Data data;
 
-  PrayerTimesResponse({required this.code, required this.status, required this.data});
+  PrayerTimesResponse(
+      {required this.code, required this.status, required this.data});
 
-  factory PrayerTimesResponse.fromJson(Map<String, dynamic> json) => _$PrayerTimesResponseFromJson(json);
+  factory PrayerTimesResponse.fromJson(Map<String, dynamic> json) =>
+      _$PrayerTimesResponseFromJson(json);
   Map<String, dynamic> toJson() => _$PrayerTimesResponseToJson(this);
 }
 
 @JsonSerializable()
 class Data {
   final Timings timings;
+
   // final Date date;
   // final Meta meta;
 
@@ -55,6 +58,7 @@ class Timings {
     required this.Lastthird,
   });
 
-  factory Timings.fromJson(Map<String, dynamic> json) => _$TimingsFromJson(json);
+  factory Timings.fromJson(Map<String, dynamic> json) =>
+      _$TimingsFromJson(json);
   Map<String, dynamic> toJson() => _$TimingsToJson(this);
 }

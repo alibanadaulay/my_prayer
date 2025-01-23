@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
+import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
+import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
@@ -15,11 +20,17 @@ void main() async {
   NotificationServive notificationServive = NotificationServive();
   notificationServive.initialize();
 
-  AdhanClientDio _adhan = AdhanClientDio();
+  AdhanClientDio adhan = AdhanClientDio();
+
+  Hive.init(Directory.current.path);
+
+  Hive.registerAdapter(PrayerDbAdapter());
+  Hive.registerAdapter(PrayerModelAdapter());
+  GetMonthPrayer(adhan);
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
-        create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(_adhan),
+        create: (_) => HomeViewModel(PermissionUtils(), GetTodayPrayer(adhan),
             GetCurrentPrayerUseCases(), notificationServive))
   ], child: const MyApp()));
 }
