@@ -54,6 +54,7 @@ dependencies:
   home_widget: ^0.7.0
   shimmer_animation: ^2.2.2
   hive_ce: ^2.9.0
+  path_provider: ^2.0.11
   hive_ce_flutter: ^2.1.0
 
 dev_dependencies:

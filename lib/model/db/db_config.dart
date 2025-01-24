@@ -1,0 +1,1 @@
+final String PRAYER = "prayers";

@@ -1,5 +1,8 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
+import 'package:my_prayer/model/db/db_config.dart';
+import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_time_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/connection_utils.dart';
@@ -27,9 +30,15 @@ class GetTodayPrayer {
       return [];
     }
     _position = position;
-    _date = DateFormat('DD-MM-YYYY ').format(DateTime.now());
+    _date = DateFormat('DD-MM-yyyy').format(DateTime.now());
     _country = country;
     _isoCoutry = isCountryCode;
+
+    List<PrayerTimeModel> prayerTimesFromDbLocal = await _getFromLocalDb();
+
+    if (prayerTimesFromDbLocal.isNotEmpty) {
+      return prayerTimesFromDbLocal;
+    }
 
     if (await connectionUtil.getConnection()) {
       return _getPrayersFromRemote();
@@ -79,8 +88,6 @@ class GetTodayPrayer {
     PrayerTimesResponse prayerTime =
         PrayerTimesResponse.fromJson(response.data);
 
-    Logger().d(adhanUrl);
-
     list.add(PrayerTimeModel(
         id: 0, name: "Subuh", time: prayerTime.data.timings.Fajr));
     list.add(PrayerTimeModel(
@@ -95,5 +102,25 @@ class GetTodayPrayer {
         id: 5, name: "Isha", time: prayerTime.data.timings.Isha));
 
     return list;
+  }
+
+  Future<List<PrayerTimeModel>> _getFromLocalDb() async {
+    final date = DateTime.now();
+
+    Box<PrayerDb> box = await Hive.openBox(PRAYER);
+    PrayerDb? prayerDb = box.get(DateFormat('DD-MM-yyyy').format(date));
+    if (prayerDb != null) {
+      List<PrayerTimeModel> prayerTimes = [];
+      for (PrayerModel timeModel in prayerDb.prayersModel) {
+        prayerTimes.add(PrayerTimeModel(
+            id: timeModel.id,
+            name: timeModel.prayerName,
+            time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
+      }
+      box.close();
+      return prayerTimes;
+    }
+
+    return [];
   }
 }

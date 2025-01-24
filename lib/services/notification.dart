@@ -9,7 +9,6 @@ class NotificationServive {
 
   Future<void> initialize() async {
     tz.initializeTimeZones();
-    Logger().i(tz.local.currentTimeZone); // Check again
 
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -34,24 +33,23 @@ class NotificationServive {
     );
   }
 
+  Future<List<PendingNotificationRequest>> getPendingNotification() async {
+    return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+  }
+
   Future<void> scheduleAlarm(
-      DateTime scheduledTime, int id, String title, String isoCountry) async {
+      DateTime scheduledTime, int id, String title) async {
+    if (DateTime.now().isAfter(scheduledTime)) {
+      return;
+    }
     final List<PendingNotificationRequest> pendingNotifications =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
-    Logger().i(scheduledTime.toString());
-    Logger()
-        .i(tz.TZDateTime.from(scheduledTime, tz.getLocation('Asia/Jakarta')));
-    Logger().i(tz.TZDateTime.from(scheduledTime, tz.UTC));
-
     for (var notification in pendingNotifications) {
       if (notification.id == id) {
-        await _flutterLocalNotificationsPlugin.cancel(id);
-        Logger().d("notificationId is found ${notification.id}");
-        // return;
+        return;
       }
     }
-    Logger().d("schedule Alaram $id");
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
@@ -69,7 +67,7 @@ class NotificationServive {
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
-      "Sudah masuk waktu $title && $time",
+      "Sudah masuk waktu $title",
       time,
       platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
@@ -81,9 +79,7 @@ class NotificationServive {
 
     for (var notification in await _flutterLocalNotificationsPlugin
         .pendingNotificationRequests()) {
-      if (notification.id == id) {
-        Logger().i("${notification.body}");
-      }
+      if (notification.id == id) {}
     }
   }
 }

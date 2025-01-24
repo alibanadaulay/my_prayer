@@ -26,6 +26,7 @@ class PrayerModel extends HiveObject {
   final int id;
   @HiveField(1)
   final String prayerName;
+  @HiveField(2)
   final String prayerTime;
 
   PrayerModel(

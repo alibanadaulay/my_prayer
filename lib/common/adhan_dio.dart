@@ -15,24 +15,26 @@ class AdhanClientDio {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          _log.d("Request URL: ${options.baseUrl}${options.path}");
-          _log.d("Request Method: ${options.method}");
-          _log.d("Request Headers: ${options.headers}");
-          _log.d("Request Data: ${options.data}");
+          _log.d("Request URL: ${options.baseUrl}${options.path} \n" +
+              "Request Method: ${options.method} \n" +
+              "Request Headers: ${options.headers} \n " +
+              "Request Data: ${options.data}");
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          _log.d("Response Status: ${response.statusCode}");
-          _log.d("Response Data: ${response.data}");
-          _log.d("Response Headers: ${response.headers}");
+          _log.d("Response Status: ${response.statusCode} \n" +
+              "Response Data: ${response.data} \n" +
+              "Response Headers: ${response.headers}");
           return handler.next(response);
         },
         onError: (error, handler) {
-          _log.d("Error: ${error.message}");
+          String messageError = "Error: ${error.message}";
           if (error.response != null) {
-            _log.d("Error Response Status: ${error.response?.statusCode}");
-            _log.d("Error Response Data: ${error.response?.data}");
+            messageError =
+                "$messageError\n Error Response Status: ${error.response?.statusCode} \n Error Response Data: ${error.response?.data}";
           }
+          _log.d(messageError);
+
           return handler.next(error);
         },
       ),

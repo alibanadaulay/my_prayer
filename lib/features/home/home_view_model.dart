@@ -2,11 +2,12 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
+import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
-import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -29,13 +30,16 @@ class HomeViewModel extends ChangeNotifier {
   final PermissionUtils _permissionUtils;
   final GetTodayPrayer _todayPrayer;
   final GetCurrentPrayerUseCases _currentPrayer;
-  final NotificationServive _notificationServive;
+  final CreatePrayerNotification _createPrayerNotification;
+  final GetMonthPrayer _getMonthPrayer;
 
   HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer,
-      this._notificationServive);
+      this._createPrayerNotification, this._getMonthPrayer);
 
   void init() async {
     arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
+    await _setLocationName("");
+    _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "ID");
     _setupPrayer();
   }
 
@@ -53,10 +57,10 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void _setupPrayer() async {
-    await _setLocationName("");
     await _getTodayPrayer();
     await _getCurrentPrayer();
     await _calculateCurrentTimeWithPrayerTime();
+    _createPrayerNotification.createNotificaion(prayerTimes);
 
     _countDownPrayer();
   }
@@ -66,15 +70,11 @@ class HomeViewModel extends ChangeNotifier {
     currenPrayer = result.name;
     timePrayer = result.time;
     notifyListeners();
-
-    DateTime targetTime =
-        await _getTargetTime(result.name == "Subuh", timePrayer);
-
-    _notificationServive.scheduleAlarm(
-        targetTime, result.id, result.name, _isoCountryCode ?? "ID");
   }
 
-  void setNewLocation() {
+  void setNewLocation() async {
+    await _setLocationName("");
+
     _setupPrayer();
   }
 

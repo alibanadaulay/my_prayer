@@ -17,10 +17,10 @@ class PrayerDbAdapter extends TypeAdapter<PrayerDb> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return PrayerDb(
-      fields[1] as String,
-      fields[0] as String,
-      fields[2] as String,
-      (fields[3] as List).cast<PrayerModel>(),
+      city: fields[1] as String,
+      isCountry: fields[0] as String,
+      date: fields[2] as String,
+      prayersModel: (fields[3] as List).cast<PrayerModel>(),
     );
   }
 
@@ -60,18 +60,21 @@ class PrayerModelAdapter extends TypeAdapter<PrayerModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return PrayerModel(
-      fields[0] as String,
-      fields[1] as String,
+      id: (fields[0] as num).toInt(),
+      prayerName: fields[1] as String,
+      prayerTime: fields[2] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, PrayerModel obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.prayerName)
+      ..write(obj.id)
       ..writeByte(1)
+      ..write(obj.prayerName)
+      ..writeByte(2)
       ..write(obj.prayerTime);
   }
 

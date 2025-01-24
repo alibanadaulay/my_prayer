@@ -1,6 +1,8 @@
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
+import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_times_month_response.dart';
 
@@ -11,20 +13,24 @@ class GetMonthPrayer {
 
   GetMonthPrayer(this._adhanClientDio);
 
-  final _today = DateTime.now();
+  late DateTime _today;
   String _city = "";
   String _isoCoutry = "";
 
   Future<void> getMonthPrayer(String city, String isoCoutry) async {
+    _today = DateTime.now();
     _city = city;
     _isoCoutry = isoCoutry;
+    _box = await Hive.openBox(PRAYER);
+
     bool result = await checkIfPrayersAvailable();
+    Logger().d(result);
     if (result) {
       _box.close();
       return;
     }
 
-    _box.clear();
+    await _box.clear();
 
     String adhanUrl =
         "calendarByCity/${_today.year}/${_today.month}?city=$city&country=$isoCoutry&method=20&shafaq=general";
@@ -36,15 +42,9 @@ class GetMonthPrayer {
   }
 
   Future<bool> checkIfPrayersAvailable() async {
-    _box = await Hive.openBox("prayers");
-
-    for (PrayerDb item in _box.values) {
-      if (item.city == _city &&
-          item.date == DateFormat("DD-MM-YYYY").format(_today)) {
-        return false;
-      }
-    }
-    return false;
+    final date = DateFormat('DD-MM-yyyy').format(_today);
+    PrayerDb? prayerModel = _box.get(date);
+    return prayerModel != null && prayerModel.city == _city;
   }
 
   Future<void> saveMonthPrayer(PrayerTimesMonthResponse data) async {
@@ -91,7 +91,9 @@ class GetMonthPrayer {
           isCountry: _isoCoutry,
           prayersModel: prayerModels);
 
-      _box.add(prayerDb);
+      await _box.put(item.date.gregorian.date, prayerDb);
+      Logger().d(
+          "${item.date.gregorian.date} ${_box.get(item.date.gregorian.date)!.prayersModel.first}");
     }
   }
 }
