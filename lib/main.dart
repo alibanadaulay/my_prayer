@@ -10,6 +10,7 @@ import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/services/notification.dart';
+import 'package:my_prayer/services/scheduler.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -30,14 +31,21 @@ void main() async {
   Hive.registerAdapter(PrayerDbAdapter());
   Hive.registerAdapter(PrayerModelAdapter());
 
+  CreatePrayerNotification createPrayerNotification =
+      CreatePrayerNotification(notificationServive);
+
+  GetMonthPrayer getMonthPrayer = GetMonthPrayer(adhan);
+
+  Scheduler(createPrayerNotification, getMonthPrayer).initCron();
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
         create: (_) => HomeViewModel(
             PermissionUtils(),
             GetTodayPrayer(adhan),
             GetCurrentPrayerUseCases(),
-            CreatePrayerNotification(notificationServive),
-            GetMonthPrayer(adhan)))
+            createPrayerNotification,
+            getMonthPrayer))
   ], child: const MyApp()));
 }
 

@@ -74,8 +74,6 @@ class NotificationServive {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
-    const NotificationDetails notificationDetails =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
 
     for (var notification in await _flutterLocalNotificationsPlugin
         .pendingNotificationRequests()) {

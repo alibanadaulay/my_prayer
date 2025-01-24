@@ -9,7 +9,6 @@ import 'package:my_prayer/utils/connection_utils.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/web.dart';
 
 class GetTodayPrayer {
   final AdhanClientDio _adhanClientDio;
