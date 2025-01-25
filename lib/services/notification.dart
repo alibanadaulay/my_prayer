@@ -37,6 +37,10 @@ class NotificationServive {
     return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 
+  Future<void> cancelAllPendingNotification() async {
+    await _flutterLocalNotificationsPlugin.cancelAll();
+  }
+
   Future<void> scheduleAlarm(
       DateTime scheduledTime, int id, String title) async {
     if (DateTime.now().isAfter(scheduledTime)) {

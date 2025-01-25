@@ -92,8 +92,6 @@ class GetMonthPrayer {
           prayersModel: prayerModels);
 
       await _box.put(item.date.gregorian.date, prayerDb);
-      Logger().d(
-          "${item.date.gregorian.date} ${_box.get(item.date.gregorian.date)!.prayersModel.first}");
     }
   }
 }

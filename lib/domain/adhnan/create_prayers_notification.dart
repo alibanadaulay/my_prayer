@@ -31,6 +31,7 @@ class CreatePrayerNotification {
         hours,
         minutes,
       );
+      _notificationService.cancelAllPendingNotification();
       _notificationService.scheduleAlarm(prayerTime, item.id, item.name);
     }
   }
