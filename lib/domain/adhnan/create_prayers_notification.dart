@@ -12,13 +12,14 @@ class CreatePrayerNotification {
   late DateTime _dateTime = DateTime.now();
   late List<PrayerTimeModel> _prayerTimeList;
 
-  void createNotificaion(List<PrayerTimeModel> prayers) async {
+  Future<void> createNotificaion(List<PrayerTimeModel> prayers) async {
     _dateTime = DateTime.now();
     _prayerTimeList = prayers;
     if (_prayerTimeList.isEmpty) {
       _prayerTimeList = await _getListPrayerTime();
     }
 
+    _notificationService.cancelAllPendingNotification();
     for (PrayerTimeModel item in _prayerTimeList) {
       List<String> parts = item.time.split(':');
 
@@ -31,7 +32,6 @@ class CreatePrayerNotification {
         hours,
         minutes,
       );
-      _notificationService.cancelAllPendingNotification();
       _notificationService.scheduleAlarm(prayerTime, item.id, item.name);
     }
   }

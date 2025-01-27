@@ -8,8 +8,10 @@ import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
+import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeViewModel extends ChangeNotifier {
   String locationName = " ";
@@ -60,6 +62,7 @@ class HomeViewModel extends ChangeNotifier {
     await _getTodayPrayer();
     await _getCurrentPrayer();
     await _calculateCurrentTimeWithPrayerTime();
+    _sendPrayerTimeToNative();
     _createPrayerNotification.createNotificaion(prayerTimes);
 
     _countDownPrayer();
@@ -76,6 +79,10 @@ class HomeViewModel extends ChangeNotifier {
     await _setLocationName("");
 
     _setupPrayer();
+  }
+
+  void recalculatedRemainingPrayerTime() {
+    _calculateCurrentTimeWithPrayerTime();
   }
 
   Future<void> _setLocationName(String name) async {
@@ -98,6 +105,7 @@ class HomeViewModel extends ChangeNotifier {
     if (_placemark != null) {
       locationName = _placemark!.locality ?? "";
       _isoCountryCode = _placemark!.isoCountryCode;
+      saveCityName();
     }
   }
 
@@ -130,6 +138,29 @@ class HomeViewModel extends ChangeNotifier {
     );
 
     return targetTime;
+  }
+
+  Future<void> _sendPrayerTimeToNative() async {
+    if (prayerTimes.isEmpty) {
+      return;
+    }
+
+    Map<String, String> prayerTimesMap = {
+      'Fajr': prayerTimes[0].time,
+      'Sunrise': prayerTimes[1].time,
+      'Dhuhr': prayerTimes[2].time,
+      'Asr': prayerTimes[3].time,
+      'Maghrib': prayerTimes[4].time,
+      'Isha': prayerTimes[5].time,
+    };
+
+    NativeBirdge.updatePrayerWidget(prayerTimesMap);
+  }
+
+  void saveCityName() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("city", locationName);
+    prefs.setString("isoCity", _isoCountryCode ?? "-");
   }
 
   void _countDownPrayer() {

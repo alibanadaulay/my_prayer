@@ -59,6 +59,7 @@ dependencies:
   cron: ^0.6.1
   firebase_core: ^3.10.1
   firebase_analytics: ^11.4.1
+  shared_preferences: ^2.4.0
 
 dev_dependencies:
   build_runner: ^2.4.14

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fajr">Subuh</string>
+    <string name="sunrise">Terbit</string>
+    <string name="dhuhr">Dzuhur</string>
+    <string name="asr">Asar</string>
+    <string name="maghrib">Maghrib</string>
+    <string name="isha">Isya</string>
+</resources>
