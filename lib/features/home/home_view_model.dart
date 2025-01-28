@@ -11,7 +11,7 @@ import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 
 class HomeViewModel extends ChangeNotifier {
   String locationName = " ";
@@ -158,9 +158,8 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void saveCityName() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("city", locationName);
-    prefs.setString("isoCity", _isoCountryCode ?? "-");
+    PrefesUtils.setString(PrefesUtils.cityParam, locationName);
+    PrefesUtils.setString(PrefesUtils.isoCityParam, _isoCountryCode ?? "-");
   }
 
   void _countDownPrayer() {

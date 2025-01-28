@@ -1,18 +1,13 @@
-// ignore_for_file: non_constant_identifier_names
-
-import 'package:cron/cron.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/services/native_birdge.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 
 class Scheduler {
-  String EVERYDAY_CRON = '* 5 0 * * *';
-  String FIRST_MONTH_CRON = '* 0 0 1 * *';
-
   final CreatePrayerNotification _createPrayerNotification;
   final GetMonthPrayer _getMonthPrayer;
   final GetTodayPrayer _getTodayPrayer;
@@ -23,21 +18,58 @@ class Scheduler {
   Scheduler(this._createPrayerNotification, this._getMonthPrayer,
       this._getTodayPrayer);
 
-  final cron = Cron();
-
   void initCron() {
     _setPrayerEveryMidnightTimesAlarm();
     _setFirstDayAtMonth();
   }
 
   void _setPrayerEveryMidnightTimesAlarm() async {
-    cron.schedule(Schedule.parse(EVERYDAY_CRON), () async {
-      FirebaseAnalytics.instance.logEvent(name: "start_set_alarm_midnight");
-      await _getCityName();
-      await _createPrayerNotification.createNotificaion([]);
-      await _setPrayerTiemToWidget();
-      FirebaseAnalytics.instance.logEvent(name: "success_set_alarm_midnight");
-    });
+    Duration initialDelay = await _getUntilMidnight();
+    final int alarmId = 0;
+    await AndroidAlarmManager.periodic(
+      const Duration(days: 1),
+      alarmId,
+      _alarmMidnightCallback,
+      startAt: DateTime.now().add(initialDelay),
+      exact: true,
+      wakeup: false,
+    );
+  }
+
+  void _alarmMidnightCallback() async {
+    FirebaseAnalytics.instance.logEvent(name: "start_set_alarm_midnight");
+    await _getCityName();
+    await _createPrayerNotification.createNotificaion([]);
+    await _setPrayerTiemToWidget();
+    FirebaseAnalytics.instance.logEvent(name: "success_set_alarm_midnight");
+  }
+
+  void _setFirstDayAtMonth() async {
+    Duration initialDelay = await _getMidnightDayOne();
+    final int alarmId = 1;
+    await AndroidAlarmManager.periodic(
+      const Duration(days: 30),
+      alarmId,
+      () async {
+        await _getCityName();
+        _getMonthPrayer.getMonthPrayer(_city, _isoCity);
+      },
+      startAt: DateTime.now().add(initialDelay),
+      exact: true,
+      wakeup: false,
+    );
+  }
+
+  Future<Duration> _getUntilMidnight() async {
+    DateTime now = DateTime.now();
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 0, 5);
+    return nextMidnight.difference(now);
+  }
+
+  Future<Duration> _getMidnightDayOne() async {
+    DateTime now = DateTime.now();
+    DateTime nextMidnight = DateTime(now.year, now.month + 1, 1);
+    return nextMidnight.difference(now);
   }
 
   Future<void> _setPrayerTiemToWidget() async {
@@ -57,15 +89,7 @@ class Scheduler {
   }
 
   Future<void> _getCityName() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _city = prefs.getString("city") ?? "";
-    _isoCity = prefs.getString("isoCity") ?? "";
-  }
-
-  void _setFirstDayAtMonth() {
-    cron.schedule(Schedule.parse(FIRST_MONTH_CRON), () async {
-      await _getCityName();
-      _getMonthPrayer.getMonthPrayer(_city, _isoCity);
-    });
+    _city = PrefesUtils.getString(PrefesUtils.cityParam);
+    _isoCity = PrefesUtils.getString(PrefesUtils.isoCityParam);
   }
 }

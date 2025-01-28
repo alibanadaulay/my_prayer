@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/services/scheduler.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
@@ -53,11 +55,15 @@ void main() async {
 void init() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await AndroidAlarmManager.initialize();
+  await PrefesUtils.init();
+
   FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 }
 
 void hiveInit() async {
   Directory dir = await getApplicationDocumentsDirectory();
+
   Hive.init(dir.path);
 
   Hive.registerAdapter(PrayerDbAdapter());
