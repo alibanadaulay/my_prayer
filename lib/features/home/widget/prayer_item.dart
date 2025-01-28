@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:provider/provider.dart';
 
 class PrayerItem extends StatelessWidget {
   final String name;
@@ -15,20 +17,24 @@ class PrayerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
-      child: Card(
-        margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        color: isNextPrayer ? Colors.blueAccent : Colors.black38,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _content(),
+    return Consumer<HomeViewModel>(
+      builder: (context, homeViewModel, child) {
+        return InkWell(
+          onTap: () {},
+          child: Card(
+            margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+            color: isNextPrayer ? Colors.blueAccent : Colors.black38,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _content(),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

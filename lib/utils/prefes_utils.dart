@@ -1,8 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefesUtils {
-  final String cityParam = "city";
-  final String isoCityParam = "isoCity";
+  static const String cityParam = "city";
+  static const String isoCityParam = "isoCity";
 
   static SharedPreferences? _preferences;
 
@@ -16,8 +16,8 @@ class PrefesUtils {
   }
 
   /// Get a String value
-  static String? getString(String key) {
-    return _preferences?.getString(key);
+  static String getString(String key) {
+    return _preferences?.getString(key) ?? "-";
   }
 
   /// Save an int value

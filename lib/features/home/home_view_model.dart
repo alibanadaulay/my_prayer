@@ -169,14 +169,20 @@ class HomeViewModel extends ChangeNotifier {
     }
     _remainingTimeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       seconds--;
-      if (seconds < 0) {
+      if (seconds <= 0) {
         timer.cancel();
-        _countDownPrayer();
+        _recalculateNextPrayer();
       } else {
         remainingTime = _formatSecondsToHHMM(seconds);
         notifyListeners();
       }
     });
+  }
+
+  void _recalculateNextPrayer() async {
+    await _getCurrentPrayer();
+    await _calculateCurrentTimeWithPrayerTime();
+    _countDownPrayer();
   }
 
   String _formatSecondsToHHMM(int seconds) {

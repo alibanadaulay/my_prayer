@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/prayer_time.dart';
+import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 
 class CreatePrayerNotification {
@@ -32,7 +33,13 @@ class CreatePrayerNotification {
         hours,
         minutes,
       );
-      _notificationService.scheduleAlarm(prayerTime, item.id, item.name);
+      PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
+          id: item.id,
+          isSound: true,
+          dateTime: prayerTime,
+          soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
+          name: item.name);
+      _notificationService.scheduleAlarm(prayreNotificationModel);
     }
   }
 

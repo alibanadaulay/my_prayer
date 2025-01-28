@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logger/logger.dart';
+import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -42,46 +43,43 @@ class NotificationServive {
   }
 
   Future<void> scheduleAlarm(
-      DateTime scheduledTime, int id, String title) async {
-    if (DateTime.now().isAfter(scheduledTime)) {
+      PrayreNotificationModel prayerNotificationModel) async {
+    if (DateTime.now().isAfter(prayerNotificationModel.dateTime)) {
       return;
     }
     final List<PendingNotificationRequest> pendingNotifications =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
     for (var notification in pendingNotifications) {
-      if (notification.id == id) {
+      if (notification.id == prayerNotificationModel.id) {
         return;
       }
     }
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
             'prayer_notification_id', 'Alarm Notifications',
             channelDescription: 'Channel for alarm notifications',
             importance: Importance.max,
             priority: Priority.high,
-            playSound: true,
+            playSound: prayerNotificationModel.isSound,
+            sound: RawResourceAndroidNotificationSound(
+                prayerNotificationModel.soundName),
             icon: "@drawable/app_icon");
 
-    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    var time =
-        tz.TZDateTime.from(scheduledTime, tz.getLocation('Asia/Jakarta'));
+    var time = tz.TZDateTime.from(
+        prayerNotificationModel.dateTime, tz.getLocation('Asia/Jakarta'));
     await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      "Sudah masuk waktu $title",
+      prayerNotificationModel.id,
+      prayerNotificationModel.name,
+      "Sudah masuk waktu ${prayerNotificationModel.name}",
       time,
       platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
-
-    for (var notification in await _flutterLocalNotificationsPlugin
-        .pendingNotificationRequests()) {
-      if (notification.id == id) {}
-    }
   }
 }
