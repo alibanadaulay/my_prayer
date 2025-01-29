@@ -6,7 +6,7 @@ part 'prayer_times_month_response.g.dart';
 class PrayerTimesMonthResponse {
   final int code;
   final String status;
-  final List<Data> data;
+  final List<PrayerTimesMonthResponseData> data;
 
   PrayerTimesMonthResponse(
       {required this.code, required this.status, required this.data});
@@ -17,14 +17,15 @@ class PrayerTimesMonthResponse {
 }
 
 @JsonSerializable()
-class Data {
+class PrayerTimesMonthResponseData {
   final Timings timings;
   final DateModel date;
 
-  Data({required this.timings, required this.date});
+  PrayerTimesMonthResponseData({required this.timings, required this.date});
 
-  factory Data.fromJson(Map<String, dynamic> json) => _$DataFromJson(json);
-  Map<String, dynamic> toJson() => _$DataToJson(this);
+  factory PrayerTimesMonthResponseData.fromJson(Map<String, dynamic> json) =>
+      _$PrayerTimesMonthResponseDataFromJson(json);
+  Map<String, dynamic> toJson() => _$PrayerTimesMonthResponseDataToJson(this);
 }
 
 // Timings class

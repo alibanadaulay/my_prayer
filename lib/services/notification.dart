@@ -5,8 +5,13 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationServive {
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  static Future<void> onDidReceiveBackgroundNotificationResponse(
+      NotificationResponse details) async {
+    Logger().i("Receiver Notification ${details.id}");
+  }
 
   Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -28,9 +33,6 @@ class NotificationServive {
       onDidReceiveNotificationResponse: (details) {
         Logger().i("Receiver Notification ${details.id} ${details.input}");
       },
-      onDidReceiveBackgroundNotificationResponse: (details) {
-        Logger().i("Receiver Notification ${details.id}");
-      },
     );
   }
 
@@ -38,16 +40,16 @@ class NotificationServive {
     return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 
-  Future<void> cancelAllPendingNotification() async {
+  static Future<void> cancelAllPendingNotification() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  Future<void> scheduleAlarm(
+  static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
     if (DateTime.now().isAfter(prayerNotificationModel.dateTime)) {
       return;
     }
-    final List<PendingNotificationRequest> pendingNotifications =
+    List<PendingNotificationRequest> pendingNotifications =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
     for (var notification in pendingNotifications) {

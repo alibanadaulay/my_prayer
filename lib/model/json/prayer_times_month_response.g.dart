@@ -12,7 +12,8 @@ PrayerTimesMonthResponse _$PrayerTimesMonthResponseFromJson(
       code: (json['code'] as num).toInt(),
       status: json['status'] as String,
       data: (json['data'] as List<dynamic>)
-          .map((e) => Data.fromJson(e as Map<String, dynamic>))
+          .map((e) =>
+              PrayerTimesMonthResponseData.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -24,12 +25,16 @@ Map<String, dynamic> _$PrayerTimesMonthResponseToJson(
       'data': instance.data,
     };
 
-Data _$DataFromJson(Map<String, dynamic> json) => Data(
+PrayerTimesMonthResponseData _$PrayerTimesMonthResponseDataFromJson(
+        Map<String, dynamic> json) =>
+    PrayerTimesMonthResponseData(
       timings: Timings.fromJson(json['timings'] as Map<String, dynamic>),
       date: DateModel.fromJson(json['date'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$DataToJson(Data instance) => <String, dynamic>{
+Map<String, dynamic> _$PrayerTimesMonthResponseDataToJson(
+        PrayerTimesMonthResponseData instance) =>
+    <String, dynamic>{
       'timings': instance.timings,
       'date': instance.date,
     };

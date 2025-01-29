@@ -7,9 +7,6 @@ import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 
 class CreatePrayerNotification {
-  final NotificationServive _notificationService;
-
-  CreatePrayerNotification(this._notificationService);
   late DateTime _dateTime = DateTime.now();
   late List<PrayerTimeModel> _prayerTimeList;
 
@@ -20,7 +17,7 @@ class CreatePrayerNotification {
       _prayerTimeList = await _getListPrayerTime();
     }
 
-    _notificationService.cancelAllPendingNotification();
+    NotificationServive.cancelAllPendingNotification();
     for (PrayerTimeModel item in _prayerTimeList) {
       List<String> parts = item.time.split(':');
 
@@ -39,7 +36,7 @@ class CreatePrayerNotification {
           dateTime: prayerTime,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);
-      _notificationService.scheduleAlarm(prayreNotificationModel);
+      NotificationServive.scheduleAlarm(prayreNotificationModel);
     }
   }
 

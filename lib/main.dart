@@ -24,8 +24,7 @@ import 'package:my_prayer/features/home/home_view_model.dart';
 void main() async {
   // await dotenv.load(fileName: "assets/.env");
 
-  init();
-  hiveInit();
+  await init();
 
   NotificationServive notificationServive = NotificationServive();
   notificationServive.initialize();
@@ -33,13 +32,12 @@ void main() async {
   AdhanClientDio adhan = AdhanClientDio();
 
   CreatePrayerNotification createPrayerNotification =
-      CreatePrayerNotification(notificationServive);
+      CreatePrayerNotification();
 
   GetMonthPrayer getMonthPrayer = GetMonthPrayer(adhan);
   GetTodayPrayer getTodayPrayer = GetTodayPrayer(adhan);
 
-  Scheduler(createPrayerNotification, getMonthPrayer, getTodayPrayer)
-      .initCron();
+  await Scheduler().initScheduler();
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
@@ -52,16 +50,19 @@ void main() async {
   ], child: const MyApp()));
 }
 
-void init() async {
+Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await AndroidAlarmManager.initialize();
-  await PrefesUtils.init();
 
-  FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await hiveInit();
+
+  await PrefesUtils.init();
+  await AndroidAlarmManager.initialize();
+
+  // FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 }
 
-void hiveInit() async {
+Future<void> hiveInit() async {
   Directory dir = await getApplicationDocumentsDirectory();
 
   Hive.init(dir.path);

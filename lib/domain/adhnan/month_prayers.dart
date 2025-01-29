@@ -1,6 +1,5 @@
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
 import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
@@ -24,7 +23,6 @@ class GetMonthPrayer {
     _box = await Hive.openBox(PRAYER);
 
     bool result = await checkIfPrayersAvailable();
-    Logger().d(result);
     if (result) {
       _box.close();
       return;
@@ -48,7 +46,7 @@ class GetMonthPrayer {
   }
 
   Future<void> saveMonthPrayer(PrayerTimesMonthResponse data) async {
-    for (Data item in data.data) {
+    for (PrayerTimesMonthResponseData item in data.data) {
       List<PrayerModel> prayerModels = [];
       prayerModels.add(PrayerModel(
         id: 0,

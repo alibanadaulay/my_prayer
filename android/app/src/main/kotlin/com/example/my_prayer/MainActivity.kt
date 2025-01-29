@@ -2,6 +2,7 @@ package com.example.my_prayer
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.util.Log
 import com.orhanobut.hawk.Hawk
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -11,11 +12,11 @@ class MainActivity: FlutterActivity(){
     private val CHANNEL = "prayer_widget_channel"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        Hawk.init(this).build()
 
         super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            Log.d("MainActivity", call.method)
             if (call.method == "updatePrayerWidget") {
                 val prayerData = call.arguments as Map<String, String>
 
@@ -27,7 +28,7 @@ class MainActivity: FlutterActivity(){
                 sendBroadcast(intent)
                 result.success(null)
             } else {
-                result.notImplemented()
+                result.error("404", call.method,null )
             }
         }
     }

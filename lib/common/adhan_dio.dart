@@ -2,44 +2,51 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
 class AdhanClientDio {
-  final Dio _dio = Dio();
-  final _log = Logger();
+  static final AdhanClientDio _instance = AdhanClientDio._internal();
+  static final Dio _dio = Dio();
+  final Logger _log = Logger();
 
-  AdhanClientDio() {
-    _dio.options
-      ..baseUrl = "https://api.aladhan.com/v1/"
-      ..connectTimeout = const Duration(seconds: 10)
-      ..receiveTimeout = const Duration(seconds: 10)
-      ..headers = {'Content-Type': 'application/json'};
+  // Private constructor for singleton
+  AdhanClientDio._internal() {
+    _dio.options = BaseOptions(
+      baseUrl: "https://api.aladhan.com/v1/",
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      headers: {'Content-Type': 'application/json'},
+    );
 
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          _log.d("Request URL: ${options.baseUrl}${options.path} \n" +
-              "Request Method: ${options.method} \n" +
-              "Request Headers: ${options.headers} \n " +
-              "Request Data: ${options.data}");
+          _log.d('''
+          🔵 [REQUEST] → ${options.method} ${options.baseUrl}${options.path}
+          Headers: ${options.headers}
+          Data: ${options.data}
+          ''');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          _log.d("Response Status: ${response.statusCode} \n" +
-              "Response Data: ${response.data} \n" +
-              "Response Headers: ${response.headers}");
+          _log.d('''
+          🟢 [RESPONSE] ← ${response.statusCode}
+          Data: ${response.data}
+          Headers: ${response.headers}
+          ''');
           return handler.next(response);
         },
         onError: (error, handler) {
-          String messageError = "Error: ${error.message}";
-          if (error.response != null) {
-            messageError =
-                "$messageError\n Error Response Status: ${error.response?.statusCode} \n Error Response Data: ${error.response?.data}";
-          }
-          _log.d(messageError);
-
+          _log.e('''
+          🔴 [ERROR] ❌ ${error.message}
+          Status Code: ${error.response?.statusCode}
+          Response Data: ${error.response?.data}
+          ''');
           return handler.next(error);
         },
       ),
     );
   }
+
+  // Singleton instance getter
+  factory AdhanClientDio() => _instance;
 
   Dio get dio => _dio;
 }
