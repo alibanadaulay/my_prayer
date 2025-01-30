@@ -195,6 +195,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   PrayerTimeModel item = homeViewModel.prayerTimes[index];
                   return PrayerItem(
                     key: Key("${item.id}"),
+                    isSound: item.isSound,
                     name: item.name,
                     time: item.time,
                     isNextPrayer: item.isNextPrayer,

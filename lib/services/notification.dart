@@ -13,7 +13,7 @@ class NotificationServive {
     Logger().i("Receiver Notification ${details.id}");
   }
 
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
     tz.initializeTimeZones();
 
     const AndroidInitializationSettings androidInitializationSettings =
@@ -46,6 +46,8 @@ class NotificationServive {
 
   static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
+    tz.initializeTimeZones();
+
     if (DateTime.now().isAfter(prayerNotificationModel.dateTime)) {
       return;
     }

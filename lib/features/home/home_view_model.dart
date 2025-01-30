@@ -157,6 +157,10 @@ class HomeViewModel extends ChangeNotifier {
     NativeBirdge.updatePrayerWidget(prayerTimesMap);
   }
 
+  void updateNotificationPrayer(String name, bool isSound) {
+    PrefesUtils.setBool(name, isSound);
+  }
+
   void saveCityName() async {
     PrefesUtils.setString(PrefesUtils.cityParam, locationName);
     PrefesUtils.setString(PrefesUtils.isoCityParam, _isoCountryCode ?? "-");

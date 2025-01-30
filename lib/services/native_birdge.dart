@@ -10,7 +10,7 @@ class NativeBirdge {
           await _channel.invokeMethod('updatePrayerWidget', prayerData);
       Logger().i(response);
     } catch (e) {
-      print("Failed to update widget: $e");
+      Logger().e("Failed to update widget: $e");
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 
 class CreatePrayerNotification {
   late DateTime _dateTime = DateTime.now();
@@ -32,7 +33,7 @@ class CreatePrayerNotification {
       );
       PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
           id: item.id,
-          isSound: true,
+          isSound: PrefesUtils.getBool(item.name) ?? false,
           dateTime: prayerTime,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);

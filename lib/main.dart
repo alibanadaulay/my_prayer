@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
@@ -11,7 +9,6 @@ import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
-import 'package:my_prayer/firebase_options.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/services/scheduler.dart';
@@ -25,9 +22,6 @@ void main() async {
   // await dotenv.load(fileName: "assets/.env");
 
   await init();
-
-  NotificationServive notificationServive = NotificationServive();
-  notificationServive.initialize();
 
   AdhanClientDio adhan = AdhanClientDio();
 
@@ -58,6 +52,7 @@ Future<void> init() async {
 
   await PrefesUtils.init();
   await AndroidAlarmManager.initialize();
+  await NotificationServive.initialize();
 
   // FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 }

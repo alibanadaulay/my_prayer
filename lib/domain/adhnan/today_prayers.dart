@@ -9,6 +9,7 @@ import 'package:my_prayer/utils/connection_utils.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 
 class GetTodayPrayer {
   final AdhanClientDio _adhanClientDio;
@@ -73,6 +74,7 @@ class GetTodayPrayer {
           id: i,
           name: entry.key,
           time: DateFormat('HH:mm').format(entry.value),
+          isSound: PrefesUtils.getBool(entry.key) ?? false,
           isNextPrayer: isNextPrayerFound));
       i++;
     }
@@ -88,17 +90,35 @@ class GetTodayPrayer {
         PrayerTimesResponse.fromJson(response.data);
 
     list.add(PrayerTimeModel(
-        id: 0, name: "Subuh", time: prayerTime.data.timings.Fajr));
+        isSound: PrefesUtils.getBool("Subuh") ?? false,
+        id: 0,
+        name: "Subuh",
+        time: prayerTime.data.timings.Fajr));
     list.add(PrayerTimeModel(
-        id: 1, name: "Sunrise", time: prayerTime.data.timings.Sunrise));
+        isSound: PrefesUtils.getBool("Sunrise") ?? false,
+        id: 1,
+        name: "Sunrise",
+        time: prayerTime.data.timings.Sunrise));
     list.add(PrayerTimeModel(
-        id: 2, name: "Dzuhur", time: prayerTime.data.timings.Dhuhr));
+        isSound: PrefesUtils.getBool("Dzuhur") ?? false,
+        id: 2,
+        name: "Dzuhur",
+        time: prayerTime.data.timings.Dhuhr));
     list.add(PrayerTimeModel(
-        id: 3, name: "Ashar", time: prayerTime.data.timings.Asr));
+        isSound: PrefesUtils.getBool("Ashar") ?? false,
+        id: 3,
+        name: "Ashar",
+        time: prayerTime.data.timings.Asr));
     list.add(PrayerTimeModel(
-        id: 4, name: "Maghrib", time: prayerTime.data.timings.Maghrib));
+        isSound: PrefesUtils.getBool("Maghrib") ?? false,
+        id: 4,
+        name: "Maghrib",
+        time: prayerTime.data.timings.Maghrib));
     list.add(PrayerTimeModel(
-        id: 5, name: "Isha", time: prayerTime.data.timings.Isha));
+        isSound: PrefesUtils.getBool("Isha") ?? false,
+        id: 5,
+        name: "Isha",
+        time: prayerTime.data.timings.Isha));
 
     return list;
   }
@@ -113,6 +133,7 @@ class GetTodayPrayer {
       for (PrayerModel timeModel in prayerDb.prayersModel) {
         prayerTimes.add(PrayerTimeModel(
             id: timeModel.id,
+            isSound: PrefesUtils.getBool(timeModel.prayerName) ?? false,
             name: timeModel.prayerName,
             time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
       }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
@@ -10,9 +12,9 @@ import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_times_month_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
-import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
+import 'package:native_shared_preferences/native_shared_preferences.dart';
 
 class Scheduler {
   static String _city = "";
@@ -65,7 +67,7 @@ class Scheduler {
 
   Future<Duration> _getUntilMidnight() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 23, 50);
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 1, 7);
     return nextMidnight.difference(now);
   }
 
@@ -83,10 +85,12 @@ class Scheduler {
       'Dhuhr': prayerTimes[2].time,
       'Asr': prayerTimes[3].time,
       'Maghrib': prayerTimes[4].time,
-      'Isha': prayerTimes[5].time,
+      // 'Isha': prayerTimes[5].time,
+      'Isha': "00:00",
     };
 
-    NativeBirdge.updatePrayerWidget(prayerTimesMap);
+    NativeSharedPreferences prefs = await NativeSharedPreferences.getInstance();
+    await prefs.setString("prayerTimes", jsonEncode(prayerTimesMap));
   }
 
   static Future<void> _getCityName() async {
