@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
 import 'package:my_prayer/main.dart';
-
 import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_times_month_response.dart';
@@ -14,7 +13,6 @@ import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
-import 'package:native_shared_preferences/native_shared_preferences.dart';
 
 class Scheduler {
   static String _city = "";
@@ -43,6 +41,7 @@ class Scheduler {
 
   static Future<void> _alarmMidnightCallback() async {
     try {
+      Logger().d("_alarmMidnightCallback");
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
       await _generateNotification(prayerTimes);
       await _setPrayerTiemToWidget(prayerTimes);
@@ -67,7 +66,8 @@ class Scheduler {
 
   Future<Duration> _getUntilMidnight() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 1, 7);
+    // DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 00, 05);
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 11, 55);
     return nextMidnight.difference(now);
   }
 
@@ -89,13 +89,13 @@ class Scheduler {
       'Isha': "00:00",
     };
 
-    NativeSharedPreferences prefs = await NativeSharedPreferences.getInstance();
-    await prefs.setString("prayerTimes", jsonEncode(prayerTimesMap));
+    PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
+    Logger().i("setStringPlatform");
   }
 
   static Future<void> _getCityName() async {
-    _city = PrefesUtils.getString(PrefesUtils.cityParam);
-    _isoCity = PrefesUtils.getString(PrefesUtils.isoCityParam);
+    _city = await PrefesUtils.getString(PrefesUtils.cityParam);
+    _isoCity = await PrefesUtils.getString(PrefesUtils.isoCityParam);
   }
 
   static Future<List<PrayerTimeModel>> _getListPrayerTime() async {
@@ -138,7 +138,7 @@ class Scheduler {
       );
       PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
           id: item.id,
-          isSound: true,
+          isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);

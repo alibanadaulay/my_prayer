@@ -5,9 +5,13 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.widget.RemoteViews
-import com.orhanobut.hawk.Hawk
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
 class PrayerWidgetProvider : AppWidgetProvider() {
@@ -81,10 +85,9 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         }
     }
     private fun retrieveMap(context: Context): Map<String, String>? {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("flutter_shared_prefs", Context.MODE_PRIVATE)
-        val jsonString = sharedPreferences.getString("flutter_prayer_times", null)
+        val jsonString = getPrayerTimesFromDataStore(context)
 
-        return if (jsonString != null) {
+        return if (jsonString.isNotEmpty()) {
             val jsonObject = JSONObject(jsonString)  // Convert JSON string to JSONObject
             val map = mutableMapOf<String, String>()
 
@@ -95,6 +98,30 @@ class PrayerWidgetProvider : AppWidgetProvider() {
             map
         } else {
             null  // Return null if no map is found
+        }
+    }
+
+   private fun getPrayerTimesFromDataStore(context: Context): String{
+        val key = stringPreferencesKey("prayerTimes") // Use the same key as Flutter
+
+        return runBlocking {
+            val preferences = DataStoreSingleton.getInstance(context).data.first()
+            val jsonString = preferences[key] ?: "" // Default to empty JSON object
+            jsonString
+        }
+    }
+}
+
+// Define a singleton DataStore instance
+val Context.dataStore by preferencesDataStore(name = "FlutterSharedPreferences")
+
+// Singleton object to hold DataStore
+object DataStoreSingleton {
+    private var instance: DataStore<Preferences>? = null
+
+    fun getInstance(context: Context): DataStore<Preferences> {
+        return instance ?: synchronized(this) {
+            instance ?: context.dataStore.also { instance = it }
         }
     }
 }

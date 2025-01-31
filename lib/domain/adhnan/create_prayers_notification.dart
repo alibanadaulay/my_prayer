@@ -33,7 +33,7 @@ class CreatePrayerNotification {
       );
       PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
           id: item.id,
-          isSound: PrefesUtils.getBool(item.name) ?? false,
+          isSound: await PrefesUtils.getBool(item.name) ?? false,
           dateTime: prayerTime,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);

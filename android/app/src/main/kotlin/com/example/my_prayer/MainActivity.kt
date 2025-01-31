@@ -20,7 +20,6 @@ class MainActivity: FlutterActivity(){
             if (call.method == "updatePrayerWidget") {
                 val prayerData = call.arguments as Map<String, String>
 
-                savePrayerMap(prayerData)
                 val intent = Intent(this, PrayerWidgetProvider::class.java).apply {
                     action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                     putExtra("PRAYER_DATA", HashMap(prayerData)) // Pass the prayer data
@@ -31,9 +30,5 @@ class MainActivity: FlutterActivity(){
                 result.notImplemented()
             }
         }
-    }
-
-    private fun savePrayerMap(prayerMap:Map<String, String>){
-        Hawk.put("prayerMap", prayerMap)
     }
 }

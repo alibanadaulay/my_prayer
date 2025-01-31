@@ -4,10 +4,11 @@ class PrefesUtils {
   static const String cityParam = "city";
   static const String isoCityParam = "isoCity";
 
-  static SharedPreferences? _preferences;
+  static SharedPreferencesAsync? _preferences;
 
   static Future<void> init() async {
-    _preferences = await SharedPreferences.getInstance();
+    SharedPreferences.setPrefix("my_prayer_prefs");
+    _preferences = SharedPreferencesAsync();
   }
 
   /// Save a String value
@@ -16,8 +17,8 @@ class PrefesUtils {
   }
 
   /// Get a String value
-  static String getString(String key) {
-    return _preferences?.getString(key) ?? "-";
+  static Future<String> getString(String key) async {
+    return await _preferences?.getString(key) ?? "";
   }
 
   /// Save an int value
@@ -27,7 +28,7 @@ class PrefesUtils {
 
   /// Get an int value
   static int? getInt(String key) {
-    return _preferences?.getInt(key);
+    // return _preferences?.getInt(key);
   }
 
   /// Save a bool value
@@ -36,8 +37,8 @@ class PrefesUtils {
   }
 
   /// Get a bool value
-  static bool? getBool(String key) {
-    return _preferences?.getBool(key);
+  static Future<bool> getBool(String key) async {
+    return await _preferences?.getBool(key) ?? false;
   }
 
   /// Save a double value
@@ -47,7 +48,7 @@ class PrefesUtils {
 
   /// Get a double value
   static double? getDouble(String key) {
-    return _preferences?.getDouble(key);
+    // return _preferences?.getDouble(key);
   }
 
   /// Save a List<String>
@@ -57,7 +58,7 @@ class PrefesUtils {
 
   /// Get a List<String>
   static List<String>? getStringList(String key) {
-    return _preferences?.getStringList(key);
+    // return _preferences?.getStringList(key);
   }
 
   /// Remove a specific key
