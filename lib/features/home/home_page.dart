@@ -24,6 +24,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    PermissionUtils.requestNotification();
     WidgetsBinding.instance.addObserver(this);
     homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
     homeViewModel.init();

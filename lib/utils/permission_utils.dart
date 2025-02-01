@@ -13,6 +13,14 @@ class PermissionUtils {
     return false;
   }
 
+  static Future<bool> requestNotification() async {
+    final bool permission = await Permission.notification.request().isGranted;
+    if (permission) {
+      return true;
+    }
+    return false;
+  }
+
   Future<Position?> getCurrentPosition() async {
     final hasPermission = await requestPermission();
     if (!hasPermission) {

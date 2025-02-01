@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
 
 class PrayerItem extends StatefulWidget {
@@ -41,11 +42,19 @@ class _PrayerItemState extends State<PrayerItem> {
           onTap: () {
             showCustomDialog(
               context,
-              (bool newSound) {
-                homeViewModel.updateNotificationPrayer(widget.name, newSound);
-                setState(() {
-                  isSound = newSound; // Update local state
-                });
+              (bool newSound) async {
+                if (newSound == true) {
+                  bool result = await PermissionUtils.requestNotification();
+                  if (result) {
+                    homeViewModel.updateNotificationPrayer(
+                        widget.name, newSound);
+                  }
+                } else {
+                  homeViewModel.updateNotificationPrayer(widget.name, newSound);
+                  setState(() {
+                    isSound = newSound; // Update local state
+                  });
+                }
               },
             );
           },
