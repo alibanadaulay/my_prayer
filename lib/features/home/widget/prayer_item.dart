@@ -51,10 +51,10 @@ class _PrayerItemState extends State<PrayerItem> {
                   }
                 } else {
                   homeViewModel.updateNotificationPrayer(widget.name, newSound);
-                  setState(() {
-                    isSound = newSound; // Update local state
-                  });
                 }
+                setState(() {
+                  isSound = newSound;
+                });
               },
             );
           },

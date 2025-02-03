@@ -29,7 +29,6 @@ class Scheduler {
       final int alarmId = 0;
       await AndroidAlarmManager.periodic(
           const Duration(days: 1), alarmId, _alarmMidnightCallback,
-          allowWhileIdle: true,
           exact: true,
           wakeup: true,
           startAt: DateTime.now().add(initialDelay),
@@ -66,8 +65,7 @@ class Scheduler {
 
   Future<Duration> _getUntilMidnight() async {
     DateTime now = DateTime.now();
-    // DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 00, 05);
-    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 11, 55);
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 19, 50);
     return nextMidnight.difference(now);
   }
 
@@ -85,8 +83,7 @@ class Scheduler {
       'Dhuhr': prayerTimes[2].time,
       'Asr': prayerTimes[3].time,
       'Maghrib': prayerTimes[4].time,
-      // 'Isha': prayerTimes[5].time,
-      'Isha': "00:00",
+      'Isha': prayerTimes[5].time,
     };
 
     PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
