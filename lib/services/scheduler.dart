@@ -130,6 +130,7 @@ class Scheduler {
       for (PrayerModel timeModel in prayerDb.prayersModel) {
         prayerTimes.add(PrayerTimeModel(
             id: timeModel.id,
+            date: date,
             name: timeModel.prayerName,
             time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
       }

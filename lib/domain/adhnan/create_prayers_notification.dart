@@ -50,6 +50,7 @@ class CreatePrayersNotification {
       for (PrayerModel timeModel in prayerDb.prayersModel) {
         prayerTimes.add(PrayerTimeModel(
             id: timeModel.id,
+            date: prayerDb.date,
             name: timeModel.prayerName,
             time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
       }

@@ -7,13 +7,6 @@ class PrefesUtils {
   static const String arabicDate = "arabicDate";
   static const String prayerTimes = "prayerTimes";
 
-  // static SharedPreferencesAsync? _preferences;
-
-  // static Future<void> init() async {
-  //   SharedPreferences.setPrefix("my_prayer_prefs");
-  //   _preferences = SharedPreferencesAsync();
-  // }
-
   static PrefesUtils? _instance;
   static SharedPreferencesAsync? _preferences;
 

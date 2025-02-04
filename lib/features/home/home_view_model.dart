@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_prayer/domain/adhnan/create_prayer_notification.dart';
 import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
@@ -17,7 +18,7 @@ import 'package:my_prayer/utils/prefes_utils.dart';
 class HomeViewModel extends ChangeNotifier {
   String locationName = " ";
   String arabicDate = "28 Rabiul Awwal 1445 H";
-  String date = "Senin , 28 Maret 2022";
+  String _todayDate = "";
   String remainingTime = "00:00:00";
   String timePrayer = "-";
   String currenPrayer = "-";
@@ -47,7 +48,7 @@ class HomeViewModel extends ChangeNotifier {
 
   void init() async {
     arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
-    // PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
     await _setLocationName("");
     _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "ID");
     _setupPrayer();
@@ -80,6 +81,7 @@ class HomeViewModel extends ChangeNotifier {
     PrayerTimeModel result = await _currentPrayer.getCurrentPrayer(prayerTimes);
     currenPrayer = result.name;
     timePrayer = result.time;
+    _todayDate = result.date;
     notifyListeners();
   }
 
@@ -133,7 +135,8 @@ class HomeViewModel extends ChangeNotifier {
     int hours = int.parse(parts[0]);
     int minutes = int.parse(parts[1]);
     int nextDay = 0;
-    if (isFajr) {
+    if (isFajr &&
+        _todayDate == DateFormat("dd-MM-yyyy").format(DateTime.now())) {
       nextDay = 1;
     }
 

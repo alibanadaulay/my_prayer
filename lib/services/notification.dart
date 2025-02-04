@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:logger/logger.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -9,9 +9,7 @@ class NotificationServive {
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static Future<void> onDidReceiveBackgroundNotificationResponse(
-      NotificationResponse details) async {
-    Logger().i("Receiver Notification ${details.id}");
-  }
+      NotificationResponse details) async {}
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -30,9 +28,7 @@ class NotificationServive {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        Logger().i("Receiver Notification ${details.id} ${details.input}");
-      },
+      onDidReceiveNotificationResponse: (details) {},
     );
   }
 
@@ -77,8 +73,8 @@ class NotificationServive {
 
     NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    var time = tz.TZDateTime.from(
-        prayerNotificationModel.dateTime, tz.getLocation('Asia/Jakarta'));
+    var time = tz.TZDateTime.from(prayerNotificationModel.dateTime,
+        tz.getLocation(await FlutterTimezone.getLocalTimezone()));
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       prayerNotificationModel.id,
       prayerNotificationModel.name,

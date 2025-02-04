@@ -1,20 +1,22 @@
-import 'package:flutter/material.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 
 class GetCurrentPrayerUseCases {
   Future<PrayerTimeModel> getCurrentPrayer(
       List<PrayerTimeModel> prayers) async {
-    TimeOfDay now = TimeOfDay.now();
+    DateTime now = DateTime.now();
 
     if (prayers.isEmpty) {
-      return PrayerTimeModel(id: 0, name: "Subuh", time: "05:00");
+      return PrayerTimeModel(id: 0, name: "Subuh", time: "05:00", date: "");
     }
 
     for (int i = 0; i < 5; i++) {
       PrayerTimeModel targetTime = prayers[i];
-      TimeOfDay target = TimeOfDay(
-        hour: int.parse(targetTime.time.split(":")[0]),
-        minute: int.parse(targetTime.time.split(":")[1]),
+      DateTime target = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(targetTime.time.split(":")[0]),
+        int.parse(targetTime.time.split(":")[1]),
       );
 
       if (target.hour > now.hour ||
