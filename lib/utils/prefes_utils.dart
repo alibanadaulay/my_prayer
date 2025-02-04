@@ -5,6 +5,7 @@ class PrefesUtils {
   static const String isoCityParam = "isoCity";
   static const String midnightAlarmId = "midnightAlarmId";
   static const String arabicDate = "arabicDate";
+  static const String prayerTimes = "prayerTimes";
 
   // static SharedPreferencesAsync? _preferences;
 

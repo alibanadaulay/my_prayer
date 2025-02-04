@@ -37,7 +37,6 @@ class Scheduler {
         PrefesUtils.setInt(PrefesUtils.midnightAlarmId, alarmId);
         _generateMidnightAlarm(alarmId);
       }
-      Logger().d("isCancel :$isCancelSucces || alarmId : $alarmId");
     } catch (e) {
       Logger().e("_alarmMidnightCallback $e");
     }
@@ -46,7 +45,7 @@ class Scheduler {
   static Future<void> _generateMidnightAlarm(int alarmId) async {
     Duration initialDelay = await _getUntilMidnight();
     await AndroidAlarmManager.periodic(
-        const Duration(seconds: 10), alarmId, _alarmMidnightCallback,
+        const Duration(days: 1), alarmId, _alarmMidnightCallback,
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),
@@ -55,7 +54,6 @@ class Scheduler {
 
   static Future<void> _alarmMidnightCallback() async {
     try {
-      Logger().d("_alarmMidnightCallback");
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
       await _generateNotification(prayerTimes);
       await _setArabicDate();
@@ -90,7 +88,7 @@ class Scheduler {
 
   static Future<Duration> _getMidnightDayOne() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month + 1, 1, 0, 0);
+    DateTime nextMidnight = DateTime(now.year, now.month + 1);
     return nextMidnight.difference(now);
   }
 
@@ -105,7 +103,7 @@ class Scheduler {
       'Isha': prayerTimes[5].time,
     };
 
-    PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
+    PrefesUtils.setString(PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
   }
 
   static Future<void> _setArabicDate() async {
@@ -126,7 +124,6 @@ class Scheduler {
 
     String date = DateFormat("dd-MM-yyyy").format(DateTime.now());
     PrayerDb? prayerDb = box.get(date);
-    Logger().d("Size ${box.values.length} || $prayerDb || $date");
 
     if (prayerDb != null) {
       List<PrayerTimeModel> prayerTimes = [];
