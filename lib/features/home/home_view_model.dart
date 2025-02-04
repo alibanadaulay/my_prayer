@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:my_prayer/domain/adhnan/create_prayer_notification.dart';
 import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
-import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
@@ -33,14 +33,21 @@ class HomeViewModel extends ChangeNotifier {
   final PermissionUtils _permissionUtils;
   final GetTodayPrayer _todayPrayer;
   final GetCurrentPrayerUseCases _currentPrayer;
-  final CreatePrayerNotification _createPrayerNotification;
+  final CreatePrayersNotification _createPrayersNotification;
   final GetMonthPrayer _getMonthPrayer;
+  final CreatePrayerNotification _createPrayerNotification;
 
-  HomeViewModel(this._permissionUtils, this._todayPrayer, this._currentPrayer,
-      this._createPrayerNotification, this._getMonthPrayer);
+  HomeViewModel(
+      this._permissionUtils,
+      this._todayPrayer,
+      this._currentPrayer,
+      this._createPrayersNotification,
+      this._getMonthPrayer,
+      this._createPrayerNotification);
 
   void init() async {
     arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
+    // PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
     await _setLocationName("");
     _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "ID");
     _setupPrayer();
@@ -64,7 +71,7 @@ class HomeViewModel extends ChangeNotifier {
     await _getCurrentPrayer();
     await _calculateCurrentTimeWithPrayerTime();
     _sendPrayerTimeToNative();
-    _createPrayerNotification.createNotificaion(prayerTimes);
+    _createPrayersNotification.createNotificaion(prayerTimes);
 
     _countDownPrayer();
   }
@@ -155,11 +162,17 @@ class HomeViewModel extends ChangeNotifier {
       'Isha': prayerTimes[5].time,
     };
 
-    NativeBirdge.updatePrayerWidget(prayerTimesMap);
+    PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
+
+    // NativeBirdge.updatePrayerWidget(prayerTimesMap);
   }
 
-  void updateNotificationPrayer(String name, bool isSound) {
-    PrefesUtils.setBool(name, isSound);
+  void updateNotificationPrayer(
+      int id, String name, bool isSound, String time) async {
+    if (isSound != await PrefesUtils.getBool(name)) {
+      PrefesUtils.setBool(name, isSound);
+      _createPrayerNotification.createNotification(id, name, time);
+    }
   }
 
   void saveCityName() async {

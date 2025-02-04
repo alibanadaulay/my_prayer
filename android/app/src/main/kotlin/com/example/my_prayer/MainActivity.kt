@@ -1,10 +1,8 @@
 package com.example.my_prayer
 
+import android.app.Fragment
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.util.Log
-import android.widget.Toast
-import com.orhanobut.hawk.Hawk
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel

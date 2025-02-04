@@ -3,15 +3,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PrefesUtils {
   static const String cityParam = "city";
   static const String isoCityParam = "isoCity";
+  static const String midnightAlarmId = "midnightAlarmId";
+  static const String arabicDate = "arabicDate";
 
+  // static SharedPreferencesAsync? _preferences;
+
+  // static Future<void> init() async {
+  //   SharedPreferences.setPrefix("my_prayer_prefs");
+  //   _preferences = SharedPreferencesAsync();
+  // }
+
+  static PrefesUtils? _instance;
   static SharedPreferencesAsync? _preferences;
 
-  static Future<void> init() async {
-    SharedPreferences.setPrefix("my_prayer_prefs");
-    _preferences = SharedPreferencesAsync();
+  PrefesUtils._internal();
+
+  static Future<PrefesUtils> getInstance() async {
+    if (_instance == null) {
+      _instance = PrefesUtils._internal();
+      SharedPreferences.setPrefix("my_prayer_prefs");
+      _preferences = SharedPreferencesAsync();
+    }
+    return _instance!;
   }
 
-  /// Save a String value
   static Future<void> setString(String key, String value) async {
     await _preferences?.setString(key, value);
   }
@@ -27,8 +42,8 @@ class PrefesUtils {
   }
 
   /// Get an int value
-  static int? getInt(String key) {
-    // return _preferences?.getInt(key);
+  static Future<int> getInt(String key) async {
+    return await _preferences?.getInt(key) ?? 0;
   }
 
   /// Save a bool value

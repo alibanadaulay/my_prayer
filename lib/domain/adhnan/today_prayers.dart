@@ -30,7 +30,7 @@ class GetTodayPrayer {
       return [];
     }
     _position = position;
-    _date = DateFormat('DD-MM-yyyy').format(DateTime.now());
+    _date = DateFormat('dd-MM-yyyy').format(DateTime.now());
     _country = country;
     _isoCoutry = isCountryCode;
 
@@ -127,7 +127,7 @@ class GetTodayPrayer {
     final date = DateTime.now();
 
     Box<PrayerDb> box = await Hive.openBox(PRAYER);
-    PrayerDb? prayerDb = box.get(DateFormat('DD-MM-yyyy').format(date));
+    PrayerDb? prayerDb = box.get(DateFormat('dd-MM-yyyy').format(date));
     if (prayerDb != null) {
       List<PrayerTimeModel> prayerTimes = [];
       for (PrayerModel timeModel in prayerDb.prayersModel) {

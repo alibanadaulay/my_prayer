@@ -44,6 +44,10 @@ class NotificationServive {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
+  static Future<void> cancelNotificationById(int id) async {
+    await _flutterLocalNotificationsPlugin.cancel(id);
+  }
+
   static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
     tz.initializeTimeZones();

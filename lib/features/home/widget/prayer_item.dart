@@ -5,6 +5,7 @@ import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
 
 class PrayerItem extends StatefulWidget {
+  final int id;
   final String name;
   final String time;
   final bool isNextPrayer;
@@ -12,6 +13,7 @@ class PrayerItem extends StatefulWidget {
 
   const PrayerItem({
     super.key,
+    required this.id,
     required this.name,
     required this.time,
     required this.isSound,
@@ -47,10 +49,13 @@ class _PrayerItemState extends State<PrayerItem> {
                   bool result = await PermissionUtils.requestNotification();
                   if (result) {
                     homeViewModel.updateNotificationPrayer(
-                        widget.name, newSound);
+                        widget.id, widget.name, newSound, widget.time);
+                  } else {
+                    return;
                   }
                 } else {
-                  homeViewModel.updateNotificationPrayer(widget.name, newSound);
+                  homeViewModel.updateNotificationPrayer(
+                      widget.id, widget.name, newSound, widget.time);
                 }
                 setState(() {
                   isSound = newSound;

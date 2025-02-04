@@ -3,8 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_widget"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="16dp">
+
+    <TextView
+        android:id="@+id/arabic_date"
+        android:text="1 Hijriah"
+        android:layout_width="wrap_content"
+        android:textColor="@color/title_widget"
+        android:layout_marginBottom="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:textSize="20sp"
+        android:layout_gravity="end"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
 
     <LinearLayout
         android:layout_width="0dp"
@@ -157,6 +174,7 @@
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
+    </LinearLayout>
     </LinearLayout>
 
 

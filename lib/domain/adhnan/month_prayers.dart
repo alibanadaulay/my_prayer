@@ -40,7 +40,7 @@ class GetMonthPrayer {
   }
 
   Future<bool> checkIfPrayersAvailable() async {
-    final date = DateFormat('DD-MM-yyyy').format(_today);
+    final date = DateFormat('dd-MM-yyyy').format(_today);
     PrayerDb? prayerModel = _box.get(date);
     return prayerModel != null && prayerModel.city == _city;
   }

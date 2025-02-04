@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -18,24 +20,37 @@ class Scheduler {
   static String _city = "";
   static String _isoCity = "";
 
-  Future<void> initScheduler() async {
+  static Future<void> initScheduler() async {
     _setPrayerEveryMidnightTimesAlarm();
     _setFirstDayAtMonth();
   }
 
-  Future<void> _setPrayerEveryMidnightTimesAlarm() async {
+  static Future<void> _setPrayerEveryMidnightTimesAlarm() async {
     try {
-      Duration initialDelay = await _getUntilMidnight();
-      final int alarmId = 0;
-      await AndroidAlarmManager.periodic(
-          const Duration(days: 1), alarmId, _alarmMidnightCallback,
-          exact: true,
-          wakeup: true,
-          startAt: DateTime.now().add(initialDelay),
-          rescheduleOnReboot: true);
+      Logger().d("_setPrayerEveryMidnightTimesAlarm");
+      int alarmId = await PrefesUtils.getInt(PrefesUtils.midnightAlarmId);
+      bool isCancelSucces = await AndroidAlarmManager.cancel(alarmId);
+      if (isCancelSucces) {
+        _generateMidnightAlarm(alarmId);
+      } else {
+        alarmId = Random(DateTime.now().millisecondsSinceEpoch).nextInt(1000);
+        PrefesUtils.setInt(PrefesUtils.midnightAlarmId, alarmId);
+        _generateMidnightAlarm(alarmId);
+      }
+      Logger().d("isCancel :$isCancelSucces || alarmId : $alarmId");
     } catch (e) {
-      Logger().d("_alarmMidnightCallback $e");
+      Logger().e("_alarmMidnightCallback $e");
     }
+  }
+
+  static Future<void> _generateMidnightAlarm(int alarmId) async {
+    Duration initialDelay = await _getUntilMidnight();
+    await AndroidAlarmManager.periodic(
+        const Duration(seconds: 10), alarmId, _alarmMidnightCallback,
+        exact: true,
+        wakeup: true,
+        startAt: DateTime.now().add(initialDelay),
+        rescheduleOnReboot: true);
   }
 
   static Future<void> _alarmMidnightCallback() async {
@@ -43,11 +58,15 @@ class Scheduler {
       Logger().d("_alarmMidnightCallback");
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
       await _generateNotification(prayerTimes);
+      await _setArabicDate();
       await _setPrayerTiemToWidget(prayerTimes);
-    } catch (e) {}
+    } catch (e) {
+      Logger().e("_alarmMidnightCallback $e");
+    }
   }
 
-  Future<void> _setFirstDayAtMonth() async {
+  static Future<void> _setFirstDayAtMonth() async {
+    Logger().d("_setFirstDayAtMonth");
     Duration initialDelay = await _getMidnightDayOne();
     final int alarmId = 1;
     await AndroidAlarmManager.periodic(
@@ -63,15 +82,15 @@ class Scheduler {
     );
   }
 
-  Future<Duration> _getUntilMidnight() async {
+  static Future<Duration> _getUntilMidnight() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month, now.day, 19, 50);
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 00, 5);
     return nextMidnight.difference(now);
   }
 
-  Future<Duration> _getMidnightDayOne() async {
+  static Future<Duration> _getMidnightDayOne() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month + 1, 1);
+    DateTime nextMidnight = DateTime(now.year, now.month + 1, 1, 0, 0);
     return nextMidnight.difference(now);
   }
 
@@ -87,7 +106,11 @@ class Scheduler {
     };
 
     PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
-    Logger().i("setStringPlatform");
+  }
+
+  static Future<void> _setArabicDate() async {
+    String arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
+    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
   }
 
   static Future<void> _getCityName() async {
@@ -97,12 +120,14 @@ class Scheduler {
 
   static Future<List<PrayerTimeModel>> _getListPrayerTime() async {
     if (!Hive.isBoxOpen(PRAYER)) {
-      await hiveInit(); // Reinitialize if necessary
+      await hiveInit();
     }
     Box<PrayerDb> box = await Hive.openBox(PRAYER);
 
-    PrayerDb? prayerDb =
-        box.get(DateFormat("DD-MM-yyyy").format(DateTime.now()));
+    String date = DateFormat("dd-MM-yyyy").format(DateTime.now());
+    PrayerDb? prayerDb = box.get(date);
+    Logger().d("Size ${box.values.length} || $prayerDb || $date");
+
     if (prayerDb != null) {
       List<PrayerTimeModel> prayerTimes = [];
       for (PrayerModel timeModel in prayerDb.prayersModel) {

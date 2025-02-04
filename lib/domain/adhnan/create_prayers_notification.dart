@@ -7,7 +7,7 @@ import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 
-class CreatePrayerNotification {
+class CreatePrayersNotification {
   late DateTime _dateTime = DateTime.now();
   late List<PrayerTimeModel> _prayerTimeList;
 
@@ -33,7 +33,7 @@ class CreatePrayerNotification {
       );
       PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
           id: item.id,
-          isSound: await PrefesUtils.getBool(item.name) ?? false,
+          isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);
@@ -44,7 +44,7 @@ class CreatePrayerNotification {
   Future<List<PrayerTimeModel>> _getListPrayerTime() async {
     Box<PrayerDb> box = await Hive.openBox(PRAYER);
 
-    PrayerDb? prayerDb = box.get(DateFormat("DD-MM-yyyy").format(_dateTime));
+    PrayerDb? prayerDb = box.get(DateFormat("dd-MM-yyyy").format(_dateTime));
     if (prayerDb != null) {
       List<PrayerTimeModel> prayerTimes = [];
       for (PrayerModel timeModel in prayerDb.prayersModel) {

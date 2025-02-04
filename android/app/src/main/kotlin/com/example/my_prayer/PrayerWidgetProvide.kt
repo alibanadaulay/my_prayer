@@ -6,10 +6,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import io.flutter.plugins.sharedpreferences.sharedPreferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -24,7 +23,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         if (intent?.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
             context?.let {
                 val prayerData = intent.getSerializableExtra("PRAYER_DATA") as? Map<String, String>
-                if (prayerData != null) {
                     val appWidgetManager = AppWidgetManager.getInstance(context)
                     val appWidgetIds = appWidgetManager.getAppWidgetIds(
                         ComponentName(
@@ -35,7 +33,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
 
                     // Update the widgets with the new data
                     updateWidgets(context, appWidgetManager, appWidgetIds, prayerData)
-                }
             }
         }
     }
@@ -62,6 +59,8 @@ class PrayerWidgetProvider : AppWidgetProvider() {
 //            val displayData = prayerData?.entries?.joinToString("\n") { "${it.key}: ${it.value}" }
 //                ?: "No prayer data available"
                 prayerDataTemp.let {
+                    views.setTextViewText(R.id.arabic_date, getArabicDate(context))
+
                     views.setTextViewText(R.id.fajr_time, prayerDataTemp["Fajr"] ?: "-")
                     views.setTextViewText(R.id.sunrise_time, prayerDataTemp["Sunrise"] ?: "-")
                     views.setTextViewText(R.id.dhuhr_time, prayerDataTemp["Dhuhr"] ?: "-")
@@ -104,24 +103,20 @@ class PrayerWidgetProvider : AppWidgetProvider() {
    private fun getPrayerTimesFromDataStore(context: Context): String{
         val key = stringPreferencesKey("prayerTimes") // Use the same key as Flutter
 
-        return runBlocking {
-            val preferences = DataStoreSingleton.getInstance(context).data.first()
+       return runBlocking {
+            val preferences = context.sharedPreferencesDataStore.data.first()
             val jsonString = preferences[key] ?: "" // Default to empty JSON object
             jsonString
         }
     }
-}
 
-// Define a singleton DataStore instance
-val Context.dataStore by preferencesDataStore(name = "FlutterSharedPreferences")
+    private fun getArabicDate(context: Context): String{
+        val key = stringPreferencesKey("arabicDate") // Use the same key as Flutter
 
-// Singleton object to hold DataStore
-object DataStoreSingleton {
-    private var instance: DataStore<Preferences>? = null
-
-    fun getInstance(context: Context): DataStore<Preferences> {
-        return instance ?: synchronized(this) {
-            instance ?: context.dataStore.also { instance = it }
+        return runBlocking {
+            val preferences = context.sharedPreferencesDataStore.data.first()
+            val jsonString = preferences[key] ?: "" // Default to empty JSON object
+            jsonString
         }
     }
 }

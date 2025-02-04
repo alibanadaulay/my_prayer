@@ -1,0 +1,30 @@
+import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/services/notification.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
+
+class CreatePrayerNotification {
+  Future<void> createNotification(int id, String name, String time) async {
+    List<String> parts = time.split(':');
+    late DateTime dateTime = DateTime.now();
+
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
+    DateTime prayerTime = DateTime(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      hours,
+      minutes,
+    );
+
+    PrayreNotificationModel prayerNotificationModel = PrayreNotificationModel(
+        id: id,
+        isSound: await PrefesUtils.getBool(name),
+        dateTime: prayerTime,
+        soundName: name == "Subuh" ? "fajr_adhan" : "adhan",
+        name: name);
+
+    await NotificationServive.cancelNotificationById(id);
+    await NotificationServive.scheduleAlarm(prayerNotificationModel);
+  }
+}

@@ -4,6 +4,7 @@ import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
+import 'package:my_prayer/domain/adhnan/create_prayer_notification.dart';
 import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
@@ -25,22 +26,24 @@ void main() async {
 
   AdhanClientDio adhan = AdhanClientDio();
 
-  CreatePrayerNotification createPrayerNotification =
-      CreatePrayerNotification();
+  CreatePrayersNotification createPrayerNotification =
+      CreatePrayersNotification();
 
   GetMonthPrayer getMonthPrayer = GetMonthPrayer(adhan);
   GetTodayPrayer getTodayPrayer = GetTodayPrayer(adhan);
 
-  await Scheduler().initScheduler();
+  await Scheduler.initScheduler();
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
         create: (_) => HomeViewModel(
-            PermissionUtils(),
-            getTodayPrayer,
-            GetCurrentPrayerUseCases(),
-            createPrayerNotification,
-            getMonthPrayer))
+              PermissionUtils(),
+              getTodayPrayer,
+              GetCurrentPrayerUseCases(),
+              createPrayerNotification,
+              getMonthPrayer,
+              CreatePrayerNotification(),
+            ))
   ], child: const MyApp()));
 }
 
@@ -48,9 +51,9 @@ Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await PrefesUtils.getInstance();
   await hiveInit();
 
-  await PrefesUtils.init();
   await AndroidAlarmManager.initialize();
   await NotificationServive.initialize();
 
