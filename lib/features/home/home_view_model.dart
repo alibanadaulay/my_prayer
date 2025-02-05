@@ -127,14 +127,21 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> _calculateCurrentTimeWithPrayerTime() async {
     final DateTime now = DateTime.now();
 
-    DateTime targetTime =
+    DateTime? targetTime =
         await _getTargetTime(currenPrayer == "Subuh", timePrayer);
+
+    if (targetTime == null) {
+      return;
+    }
 
     seconds = targetTime.difference(now).inSeconds;
   }
 
-  Future<DateTime> _getTargetTime(bool isFajr, String hourMinute) async {
+  Future<DateTime?> _getTargetTime(bool isFajr, String hourMinute) async {
     final DateTime now = DateTime.now();
+    if (hourMinute.isEmpty) {
+      return null;
+    }
 
     List<String> parts = hourMinute.split(':');
     int hours = int.parse(parts[0]);

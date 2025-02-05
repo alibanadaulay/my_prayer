@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:logger/logger.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
@@ -78,6 +79,8 @@ class NotificationService {
         return;
       }
     }
+    Logger().i(
+        "${prayerNotificationModel.name}, sound : ${prayerNotificationModel.isSound}");
 
     AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
