@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
-import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_prayer/domain/adhnan/create_prayer_notification.dart';
@@ -11,6 +10,7 @@ import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
+import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
@@ -47,11 +47,15 @@ class HomeViewModel extends ChangeNotifier {
       this._createPrayerNotification);
 
   void init() async {
-    arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
-    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+    getHijriDate(null);
     await _setLocationName("");
     _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "ID");
     _setupPrayer();
+  }
+
+  Future<void> getHijriDate(String? date) async {
+    arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
+    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
   }
 
   Future<void> _getTodayPrayer() async {
@@ -60,6 +64,7 @@ class HomeViewModel extends ChangeNotifier {
     try {
       prayerTimes = await _todayPrayer.getTodayPrayer(
           locationName, _isoCountryCode ?? "-");
+      await getHijriDate(prayerTimes[4].time);
       _prayerListState = ViewState.success;
       notifyListeners();
     } catch (e) {
@@ -166,8 +171,6 @@ class HomeViewModel extends ChangeNotifier {
     };
 
     PrefesUtils.setString("prayerTimes", jsonEncode(prayerTimesMap));
-
-    // NativeBirdge.updatePrayerWidget(prayerTimesMap);
   }
 
   void updateNotificationPrayer(

@@ -1,10 +1,17 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/utils/calender_utils.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-class NotificationServive {
+@pragma('vm:entry-point')
+void onBackgroundNotificationResponse(NotificationResponse details) {
+  NotificationService.updateDate(details.payload);
+}
+
+class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -28,8 +35,20 @@ class NotificationServive {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {},
+      onDidReceiveNotificationResponse: (details) {
+        updateDate(details.payload);
+      },
+      onDidReceiveBackgroundNotificationResponse:
+          onBackgroundNotificationResponse,
     );
+  }
+
+  static void updateDate(String? payload) async {
+    if (payload != null) {
+      List<String> part = payload.split('.');
+      String hijriDate = "${CalenderUtils.getHijriDate(part[1])}H";
+      PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
+    }
   }
 
   Future<List<PendingNotificationRequest>> getPendingNotification() async {
@@ -80,6 +99,8 @@ class NotificationServive {
       prayerNotificationModel.name,
       "Sudah masuk waktu ${prayerNotificationModel.name}",
       time,
+      payload:
+          "${prayerNotificationModel.name}.${prayerNotificationModel.time}",
       platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:

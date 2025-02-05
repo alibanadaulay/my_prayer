@@ -55,7 +55,7 @@ Future<void> init() async {
   await hiveInit();
 
   await AndroidAlarmManager.initialize();
-  await NotificationServive.initialize();
+  await NotificationService.initialize();
 
   // FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 }

@@ -18,7 +18,7 @@ class CreatePrayersNotification {
       _prayerTimeList = await _getListPrayerTime();
     }
 
-    NotificationServive.cancelAllPendingNotification();
+    NotificationService.cancelAllPendingNotification();
     for (PrayerTimeModel item in _prayerTimeList) {
       List<String> parts = item.time.split(':');
 
@@ -35,9 +35,10 @@ class CreatePrayersNotification {
           id: item.id,
           isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
+          time: item.time,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);
-      NotificationServive.scheduleAlarm(prayreNotificationModel);
+      NotificationService.scheduleAlarm(prayreNotificationModel);
     }
   }
 

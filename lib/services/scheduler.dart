@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:hijri/hijri_calendar.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -14,28 +12,27 @@ import 'package:my_prayer/model/json/prayer_times_month_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
+import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
+  static List<String> hours = ["00:05", "06:05", "12:05", "18:05"];
+  static int midnightAlarmId = 1;
 
   static Future<void> initScheduler() async {
     _setPrayerEveryMidnightTimesAlarm();
-    _setFirstDayAtMonth();
+    // _setFirstDayAtMonth();
   }
 
   static Future<void> _setPrayerEveryMidnightTimesAlarm() async {
     try {
-      Logger().d("_setPrayerEveryMidnightTimesAlarm");
       int alarmId = await PrefesUtils.getInt(PrefesUtils.midnightAlarmId);
-      bool isCancelSucces = await AndroidAlarmManager.cancel(alarmId);
-      if (isCancelSucces) {
-        _generateMidnightAlarm(alarmId);
-      } else {
-        alarmId = Random(DateTime.now().millisecondsSinceEpoch).nextInt(1000);
-        PrefesUtils.setInt(PrefesUtils.midnightAlarmId, alarmId);
-        _generateMidnightAlarm(alarmId);
+      Logger().i("_alarmMidnightCallback id: $alarmId");
+      if (alarmId != midnightAlarmId) {
+        await _generateMidnightAlarm(midnightAlarmId);
+        PrefesUtils.setInt(PrefesUtils.midnightAlarmId, midnightAlarmId);
       }
     } catch (e) {
       Logger().e("_alarmMidnightCallback $e");
@@ -45,7 +42,7 @@ class Scheduler {
   static Future<void> _generateMidnightAlarm(int alarmId) async {
     Duration initialDelay = await _getUntilMidnight();
     await AndroidAlarmManager.periodic(
-        const Duration(days: 1), alarmId, _alarmMidnightCallback,
+        const Duration(hours: 6), alarmId, _alarmMidnightCallback,
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),
@@ -56,8 +53,8 @@ class Scheduler {
     try {
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
       await _generateNotification(prayerTimes);
-      await _setArabicDate();
       await _setPrayerTiemToWidget(prayerTimes);
+      await _setArabicDate(prayerTimes[4].time);
     } catch (e) {
       Logger().e("_alarmMidnightCallback $e");
     }
@@ -82,7 +79,23 @@ class Scheduler {
 
   static Future<Duration> _getUntilMidnight() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 00, 5);
+    DateTime? temp;
+
+    for (String time in hours) {
+      List<String> parts = time.split(":");
+      DateTime compare = DateTime(now.year, now.month, now.day,
+          int.parse(parts[0]), int.parse(parts[1]));
+
+      if (compare.isAfter(now) && (temp == null || compare.isBefore(temp))) {
+        temp = compare;
+      }
+    }
+
+    if (temp != null) {
+      return temp.difference(now);
+    }
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1, 00, 05);
+
     return nextMidnight.difference(now);
   }
 
@@ -106,8 +119,8 @@ class Scheduler {
     PrefesUtils.setString(PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
   }
 
-  static Future<void> _setArabicDate() async {
-    String arabicDate = "${HijriCalendar.now().toFormat("dd MMMM yyyy")}H";
+  static Future<void> _setArabicDate(String date) async {
+    String arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
     PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
   }
 
@@ -143,7 +156,7 @@ class Scheduler {
   static Future<void> _generateNotification(
       List<PrayerTimeModel> prayerTimeList) async {
     final DateTime dateTime = DateTime.now();
-    NotificationServive.cancelAllPendingNotification();
+    NotificationService.cancelAllPendingNotification();
     for (PrayerTimeModel item in prayerTimeList) {
       List<String> parts = item.time.split(':');
 
@@ -160,9 +173,10 @@ class Scheduler {
           id: item.id,
           isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
+          time: item.time,
           soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
           name: item.name);
-      NotificationServive.scheduleAlarm(prayreNotificationModel);
+      NotificationService.scheduleAlarm(prayreNotificationModel);
     }
   }
 

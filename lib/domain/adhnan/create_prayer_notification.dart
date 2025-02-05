@@ -19,12 +19,13 @@ class CreatePrayerNotification {
 
     PrayreNotificationModel prayerNotificationModel = PrayreNotificationModel(
         id: id,
+        time: time,
         isSound: await PrefesUtils.getBool(name),
         dateTime: prayerTime,
         soundName: name == "Subuh" ? "fajr_adhan" : "adhan",
         name: name);
 
-    await NotificationServive.cancelNotificationById(id);
-    await NotificationServive.scheduleAlarm(prayerNotificationModel);
+    await NotificationService.cancelNotificationById(id);
+    await NotificationService.scheduleAlarm(prayerNotificationModel);
   }
 }
