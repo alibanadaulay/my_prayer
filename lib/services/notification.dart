@@ -49,6 +49,7 @@ class NotificationService {
   static Future<void> updateDate(String? payload) async {
     if (payload != null) {
       List<String> part = payload.split('.');
+      PrefesUtils.setString(PrefesUtils.currentPrayer, part[0]);
       String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
       PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
     }

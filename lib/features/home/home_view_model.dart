@@ -84,10 +84,12 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> _getCurrentPrayer() async {
     PrayerTimeModel result = await _currentPrayer.getCurrentPrayer(prayerTimes);
+
     currenPrayer = result.name;
     timePrayer = result.time;
     _todayDate = result.date;
     notifyListeners();
+    PrefesUtils.setString(PrefesUtils.currentPrayer, currenPrayer);
   }
 
   void setNewLocation() async {

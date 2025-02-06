@@ -6,8 +6,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import io.flutter.plugins.sharedpreferences.sharedPreferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -51,22 +51,36 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         prayerData: Map<String, String>?
     ) {
         val prayerDataTemp = prayerData ?: retrieveMap(context)
+        val currentPrayer = getCurrentPrayer(context)
         if (!prayerDataTemp.isNullOrEmpty()) {
             for (widgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.prayer_list)
 
                 // Display prayer data (or default message if null)
-//            val displayData = prayerData?.entries?.joinToString("\n") { "${it.key}: ${it.value}" }
-//                ?: "No prayer data available"
                 prayerDataTemp.let {
-                    views.setTextViewText(R.id.arabic_date, getArabicDate(context))
+                    val fajr = prayerDataTemp["Fajr"]
+                    val sunrise = prayerDataTemp["Sunrise"]
+                    val dhuhr = prayerDataTemp["Dhuhr"]
+                    val asr = prayerDataTemp["Asr"]
+                    val maghrib = prayerDataTemp["Maghrib"]
+                    val isha = prayerDataTemp["Isha"]
+                    val id  = when(currentPrayer){
+                        "Sunrise" -> R.id.ll_sunrise
+                        "Dhuhr" -> R.id.ll_dhuhr
+                        "Asr" -> R.id.ll_asr
+                        "Maghrib" -> R.id.ll_maghrib
+                        "Isha" -> R.id.ll_isha
+                        else -> R.id.ll_fajr
+                    }
+                    views.setInt(id, "setBackgroundResource", R.drawable.bg_current_prayer);
 
-                    views.setTextViewText(R.id.fajr_time, prayerDataTemp["Fajr"] ?: "-")
-                    views.setTextViewText(R.id.sunrise_time, prayerDataTemp["Sunrise"] ?: "-")
-                    views.setTextViewText(R.id.dhuhr_time, prayerDataTemp["Dhuhr"] ?: "-")
-                    views.setTextViewText(R.id.asr_time, prayerDataTemp["Asr"] ?: "-")
-                    views.setTextViewText(R.id.maghrib_time, prayerDataTemp["Maghrib"] ?: "-")
-                    views.setTextViewText(R.id.isha_time, prayerDataTemp["Isha"] ?: "-")
+                    views.setTextViewText(R.id.arabic_date, getArabicDate(context))
+                    views.setTextViewText(R.id.fajr_time, fajr ?: "-")
+                    views.setTextViewText(R.id.sunrise_time, sunrise ?: "-")
+                    views.setTextViewText(R.id.dhuhr_time, dhuhr?: "-")
+                    views.setTextViewText(R.id.asr_time, asr ?: "-")
+                    views.setTextViewText(R.id.maghrib_time, maghrib ?: "-")
+                    views.setTextViewText(R.id.isha_time, isha ?: "-")
 
 
                     views.setTextViewText(R.id.fajr_title, context.getString(R.string.fajr))
@@ -75,6 +89,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.asr_title, context.getString(R.string.asr))
                     views.setTextViewText(R.id.maghrib_title, context.getString(R.string.maghrib))
                     views.setTextViewText(R.id.isha_title, context.getString(R.string.isha))
+
                 }
 
 
@@ -107,6 +122,14 @@ class PrayerWidgetProvider : AppWidgetProvider() {
             val preferences = context.sharedPreferencesDataStore.data.first()
             val jsonString = preferences[key] ?: "" // Default to empty JSON object
             jsonString
+        }
+    }
+    private fun getCurrentPrayer(context: Context):String{
+        val key = stringPreferencesKey("currentPrayer") // Use the same key as Flutter
+
+        return runBlocking {
+            val preferences = context.sharedPreferencesDataStore.data.first()
+            preferences[key] ?: ""
         }
     }
 
