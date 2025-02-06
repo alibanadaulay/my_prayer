@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
@@ -14,6 +15,11 @@ import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
+
+@pragma('vm:entry-point')
+void onAlarmEverySixHourCallback() {
+  unawaited(Scheduler.handleAlarmEverySixHour());
+}
 
 class Scheduler {
   static String _city = "";
@@ -42,14 +48,14 @@ class Scheduler {
   static Future<void> _generateMidnightAlarm(int alarmId) async {
     Duration initialDelay = await _getUntilMidnight();
     await AndroidAlarmManager.periodic(
-        const Duration(hours: 6), alarmId, _alarmMidnightCallback,
+        const Duration(hours: 6), alarmId, onAlarmEverySixHourCallback,
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),
         rescheduleOnReboot: true);
   }
 
-  static Future<void> _alarmMidnightCallback() async {
+  static Future<void> handleAlarmEverySixHour() async {
     try {
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
       await _generateNotification(prayerTimes);

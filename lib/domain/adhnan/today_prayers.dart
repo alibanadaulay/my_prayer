@@ -91,37 +91,37 @@ class GetTodayPrayer {
         PrayerTimesResponse.fromJson(response.data);
 
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Subuh") ?? false,
+        isSound: await PrefesUtils.getBool("Subuh"),
         id: 0,
         name: "Subuh",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
         time: prayerTime.data.timings.Fajr));
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Sunrise") ?? false,
+        isSound: await PrefesUtils.getBool("Sunrise"),
         id: 1,
         name: "Sunrise",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
         time: prayerTime.data.timings.Sunrise));
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Dzuhur") ?? false,
+        isSound: await PrefesUtils.getBool("Dzuhur"),
         id: 2,
         name: "Dzuhur",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
         time: prayerTime.data.timings.Dhuhr));
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Ashar") ?? false,
+        isSound: await PrefesUtils.getBool("Ashar"),
         id: 3,
         name: "Ashar",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
         time: prayerTime.data.timings.Asr));
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Maghrib") ?? false,
+        isSound: await PrefesUtils.getBool("Maghrib"),
         id: 4,
         name: "Maghrib",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
         time: prayerTime.data.timings.Maghrib));
     list.add(PrayerTimeModel(
-        isSound: await PrefesUtils.getBool("Isha") ?? false,
+        isSound: await PrefesUtils.getBool("Isha"),
         id: 5,
         name: "Isha",
         date: DateFormat("dd-MM-yyyy").format(DateTime.now()),
@@ -141,7 +141,7 @@ class GetTodayPrayer {
         prayerTimes.add(PrayerTimeModel(
             id: timeModel.id,
             date: prayerDb.date,
-            isSound: await PrefesUtils.getBool(timeModel.prayerName) ?? false,
+            isSound: await PrefesUtils.getBool(timeModel.prayerName),
             name: timeModel.prayerName,
             time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
       }

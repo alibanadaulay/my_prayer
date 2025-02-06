@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:logger/logger.dart';
@@ -9,7 +11,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse details) {
-  NotificationService.updateDate(details.payload);
+  unawaited(NotificationService.updateDate(details.payload));
 }
 
 class NotificationService {
@@ -44,10 +46,10 @@ class NotificationService {
     );
   }
 
-  static void updateDate(String? payload) async {
+  static Future<void> updateDate(String? payload) async {
     if (payload != null) {
       List<String> part = payload.split('.');
-      String hijriDate = "${CalenderUtils.getHijriDate(part[1])}H";
+      String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
       PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
     }
   }
@@ -88,6 +90,8 @@ class NotificationService {
             channelDescription: 'Channel for alarm notifications',
             importance: Importance.max,
             priority: Priority.high,
+            autoCancel: true,
+            enableVibration: prayerNotificationModel.isSound,
             playSound: prayerNotificationModel.isSound,
             sound: RawResourceAndroidNotificationSound(
                 prayerNotificationModel.soundName),
