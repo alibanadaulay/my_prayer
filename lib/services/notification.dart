@@ -67,6 +67,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
+  @pragma('vm:entry-point')
   static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
     tz.initializeTimeZones();
@@ -114,5 +115,7 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
+    Logger().i(
+        "${prayerNotificationModel.name} ${androidPlatformChannelSpecifics.channelId} : $time");
   }
 }

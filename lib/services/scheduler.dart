@@ -29,6 +29,8 @@ class Scheduler {
 
   static Future<void> initScheduler() async {
     _setPrayerEveryMidnightTimesAlarm();
+    AndroidAlarmManager.cancel(2);
+    // _testAlarm(2);
     // _setFirstDayAtMonth();
   }
 
@@ -45,6 +47,20 @@ class Scheduler {
     }
   }
 
+  static Future<void> _testAlarm(int alarmId) async {
+    DateTime now = DateTime.now();
+    DateTime delay =
+        DateTime(now.year, now.month, now.day, now.hour, now.minute + 3);
+    Duration initialDelay = delay.difference(now);
+    Logger().i("_testAlarm id: $alarmId $delay - $now");
+    await AndroidAlarmManager.periodic(
+        const Duration(seconds: 30), alarmId, onAlarmEverySixHourCallback,
+        exact: true,
+        wakeup: true,
+        startAt: DateTime.now().add(initialDelay),
+        rescheduleOnReboot: true);
+  }
+
   static Future<void> _generateMidnightAlarm(int alarmId) async {
     Duration initialDelay = await _getUntilMidnight();
     await AndroidAlarmManager.periodic(
@@ -58,6 +74,10 @@ class Scheduler {
   static Future<void> handleAlarmEverySixHour() async {
     try {
       List<PrayerTimeModel> prayerTimes = await _getListPrayerTime();
+      if (prayerTimes.isEmpty) {
+        return;
+      }
+      PrefesUtils.getInstance();
       await _generateNotification(prayerTimes);
       await _setPrayerTiemToWidget(prayerTimes);
       await _setArabicDate(prayerTimes[4].time);
@@ -113,21 +133,30 @@ class Scheduler {
 
   static Future<void> _setPrayerTiemToWidget(
       List<PrayerTimeModel> prayerTimes) async {
-    Map<String, String> prayerTimesMap = {
-      'Fajr': prayerTimes[0].time,
-      'Sunrise': prayerTimes[1].time,
-      'Dhuhr': prayerTimes[2].time,
-      'Asr': prayerTimes[3].time,
-      'Maghrib': prayerTimes[4].time,
-      'Isha': prayerTimes[5].time,
-    };
+    try {
+      Map<String, String> prayerTimesMap = {
+        'Fajr': prayerTimes[0].time,
+        'Sunrise': prayerTimes[1].time,
+        'Dhuhr': prayerTimes[2].time,
+        'Asr': prayerTimes[3].time,
+        'Maghrib': prayerTimes[4].time,
+        'Isha': prayerTimes[5].time,
+      };
 
-    PrefesUtils.setString(PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
+      PrefesUtils.setString(
+          PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
+    } catch (e) {
+      Logger().e("_setPrayerTiemToWidget $e");
+    }
   }
 
   static Future<void> _setArabicDate(String date) async {
-    String arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
-    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+    try {
+      String arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
+      PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+    } catch (e) {
+      Logger().e("_setArabicDate $e");
+    }
   }
 
   static Future<void> _getCityName() async {
@@ -136,24 +165,30 @@ class Scheduler {
   }
 
   static Future<List<PrayerTimeModel>> _getListPrayerTime() async {
-    if (!Hive.isBoxOpen(PRAYER)) {
-      await hiveInit();
-    }
-    Box<PrayerDb> box = await Hive.openBox(PRAYER);
-
-    String date = DateFormat("dd-MM-yyyy").format(DateTime.now());
-    PrayerDb? prayerDb = box.get(date);
-
-    if (prayerDb != null) {
-      List<PrayerTimeModel> prayerTimes = [];
-      for (PrayerModel timeModel in prayerDb.prayersModel) {
-        prayerTimes.add(PrayerTimeModel(
-            id: timeModel.id,
-            date: date,
-            name: timeModel.prayerName,
-            time: timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
+    try {
+      if (!Hive.isAdapterRegistered(0)) {
+        await hiveInit();
       }
-      return prayerTimes;
+      Box<PrayerDb> box = await Hive.openBox(PRAYER);
+
+      String date = DateFormat("dd-MM-yyyy").format(DateTime.now());
+      PrayerDb? prayerDb = box.get(date);
+
+      if (prayerDb != null) {
+        List<PrayerTimeModel> prayerTimes = [];
+        for (PrayerModel timeModel in prayerDb.prayersModel) {
+          prayerTimes.add(PrayerTimeModel(
+              id: timeModel.id,
+              date: date,
+              name: timeModel.prayerName,
+              time:
+                  timeModel.prayerTime.replaceAll(RegExp(r" \([^)]+\)"), "")));
+        }
+        return prayerTimes;
+      }
+    } catch (e) {
+      Logger().e("_getListPrayerTime $e");
+      return [];
     }
 
     return [];
@@ -162,27 +197,32 @@ class Scheduler {
   static Future<void> _generateNotification(
       List<PrayerTimeModel> prayerTimeList) async {
     final DateTime dateTime = DateTime.now();
-    NotificationService.cancelAllPendingNotification();
-    for (PrayerTimeModel item in prayerTimeList) {
-      List<String> parts = item.time.split(':');
+    try {
+      NotificationService.cancelAllPendingNotification();
+      for (PrayerTimeModel item in prayerTimeList) {
+        List<String> parts = item.time.split(':');
 
-      int hours = int.parse(parts[0]);
-      int minutes = int.parse(parts[1]);
-      DateTime prayerTime = DateTime(
-        dateTime.year,
-        dateTime.month,
-        dateTime.day,
-        hours,
-        minutes,
-      );
-      PrayreNotificationModel prayreNotificationModel = PrayreNotificationModel(
-          id: item.id,
-          isSound: await PrefesUtils.getBool(item.name),
-          dateTime: prayerTime,
-          time: item.time,
-          soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
-          name: item.name);
-      NotificationService.scheduleAlarm(prayreNotificationModel);
+        int hours = int.parse(parts[0]);
+        int minutes = int.parse(parts[1]);
+        DateTime prayerTime = DateTime(
+          dateTime.year,
+          dateTime.month,
+          dateTime.day,
+          hours,
+          minutes,
+        );
+        PrayreNotificationModel prayreNotificationModel =
+            PrayreNotificationModel(
+                id: item.id,
+                isSound: await PrefesUtils.getBool(item.name),
+                dateTime: prayerTime,
+                time: item.time,
+                soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
+                name: item.name);
+        NotificationService.scheduleAlarm(prayreNotificationModel);
+      }
+    } catch (e) {
+      Logger().e("_generateNotification $e");
     }
   }
 
@@ -195,7 +235,8 @@ class Scheduler {
     PrayerTimesMonthResponse data =
         PrayerTimesMonthResponse.fromJson(response.data);
 
-    if (!Hive.isBoxOpen(PRAYER)) {
+    Logger().i("isAdapterRegis ${!Hive.isAdapterRegistered(0)}");
+    if (!Hive.isAdapterRegistered(0)) {
       await hiveInit();
     }
     Box<PrayerDb> box = await Hive.openBox(PRAYER);

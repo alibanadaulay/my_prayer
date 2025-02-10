@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.flutter.plugins.sharedpreferences.sharedPreferencesDataStore
 import kotlinx.coroutines.flow.first
@@ -14,6 +13,35 @@ import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
 class PrayerWidgetProvider : AppWidgetProvider() {
+    companion object {
+        fun getPrayerTimesFromDataStore(context: Context): String{
+            val key = stringPreferencesKey("prayerTimes") // Use the same key as Flutter
+
+            return runBlocking {
+                val preferences = context.sharedPreferencesDataStore.data.first()
+                val jsonString = preferences[key] ?: "" // Default to empty JSON object
+                jsonString
+            }
+        }
+        fun getCurrentPrayer(context: Context):String{
+            val key = stringPreferencesKey("currentPrayer") // Use the same key as Flutter
+
+            return runBlocking {
+                val preferences = context.sharedPreferencesDataStore.data.first()
+                preferences[key] ?: ""
+            }
+        }
+
+        fun getArabicDate(context: Context): String{
+            val key = stringPreferencesKey("arabicDate") // Use the same key as Flutter
+
+            return runBlocking {
+                val preferences = context.sharedPreferencesDataStore.data.first()
+                val jsonString = preferences[key] ?: "" // Default to empty JSON object
+                jsonString
+            }
+        }
+    }
 
     override fun onEnabled(context: Context?) {
         super.onEnabled(context)
@@ -82,7 +110,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.maghrib_time, maghrib ?: "-")
                     views.setTextViewText(R.id.isha_time, isha ?: "-")
 
-
                     views.setTextViewText(R.id.fajr_title, context.getString(R.string.fajr))
                     views.setTextViewText(R.id.sunrise_title, context.getString(R.string.sunrise))
                     views.setTextViewText(R.id.dhuhr_title, context.getString(R.string.dhuhr))
@@ -91,7 +118,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.isha_title, context.getString(R.string.isha))
 
                 }
-
 
                 // Update the widget
                 appWidgetManager.updateAppWidget(widgetId, views)

@@ -1,13 +1,16 @@
 package com.example.my_prayer
 
-import android.app.Fragment
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity(){
+    companion object {
+        private const val TAG = "MainActivity"
+    }
     private val CHANNEL = "prayer_widget_channel"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -24,7 +27,14 @@ class MainActivity: FlutterActivity(){
                 }
                 sendBroadcast(intent)
                 result.success(null)
-            } else {
+
+
+            } else if(call.method == "logCurrentDate"){
+                val current = PrayerWidgetProvider.getCurrentPrayer(this@MainActivity.context)
+                Log.d(TAG, current)
+            }
+
+            else {
                 result.notImplemented()
             }
         }

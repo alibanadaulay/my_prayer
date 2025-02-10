@@ -11,4 +11,12 @@ class NativeBirdge {
       Logger().e("Failed to update widget: $e");
     }
   }
+
+  static Future<void> logCurrentDate() async {
+    try {
+      await _channel.invokeMethod('logCurrentDate', "");
+    } catch (e) {
+      Logger().e("Failed to update widget: $e");
+    }
+  }
 }
