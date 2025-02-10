@@ -29,12 +29,7 @@ class MainActivity: FlutterActivity(){
                 result.success(null)
 
 
-            } else if(call.method == "logCurrentDate"){
-                val current = PrayerWidgetProvider.getCurrentPrayer(this@MainActivity.context)
-                Log.d(TAG, current)
-            }
-
-            else {
+            } else {
                 result.notImplemented()
             }
         }

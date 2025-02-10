@@ -10,7 +10,6 @@ import 'package:my_prayer/domain/adhnan/month_prayers.dart';
 import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/features/state_ui.dart';
 import 'package:my_prayer/model/prayer_time.dart';
-import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:geolocator/geolocator.dart';
@@ -56,8 +55,7 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> getHijriDate(String? date) async {
     arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
-    NativeBirdge.logCurrentDate();
-    // PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+    PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
   }
 
   Future<void> _getTodayPrayer() async {
@@ -91,7 +89,7 @@ class HomeViewModel extends ChangeNotifier {
     timePrayer = result.time;
     _todayDate = result.date;
     notifyListeners();
-    PrefesUtils.setString(PrefesUtils.currentPrayer, currenPrayer);
+    PrefesUtils.setInt(PrefesUtils.currentPrayer, result.id);
   }
 
   void setNewLocation() async {

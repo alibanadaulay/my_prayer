@@ -77,6 +77,7 @@ class MyApp extends StatelessWidget {
     const String title = 'My Prayer';
     return MaterialApp(
         title: 'Flutter Demo',
+        themeMode: ThemeMode.system,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,

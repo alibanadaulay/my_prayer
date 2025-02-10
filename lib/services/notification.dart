@@ -11,7 +11,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse details) {
-  unawaited(NotificationService.updateDate(details.payload));
+  unawaited(NotificationService.updateDate(details.payload, details.id));
 }
 
 class NotificationService {
@@ -39,18 +39,22 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (details) {
-        updateDate(details.payload);
+        updateDate(details.payload, details.id);
       },
       onDidReceiveBackgroundNotificationResponse:
           onBackgroundNotificationResponse,
     );
   }
 
-  static Future<void> updateDate(String? payload) async {
+  static Future<void> updateDate(String? payload, int? id) async {
     if (payload != null) {
       PrefesUtils.getInstance();
       List<String> part = payload.split('.');
-      PrefesUtils.setString(PrefesUtils.currentPrayer, part[0]);
+      int nextPrayerId = id ?? 0 + 1;
+      if (nextPrayerId >= 5) {
+        nextPrayerId = 0;
+      }
+      PrefesUtils.setInt(PrefesUtils.currentPrayer, nextPrayerId);
       String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
       PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
     }
