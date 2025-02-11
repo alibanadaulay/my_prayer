@@ -18,24 +18,27 @@ import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
+import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
 void onAlarmEverySixHourCallback() async {
   await Firebase.initializeApp();
+  String uuid = Uuid().v4();
+  String pattern = "dd-MM-yyyy hh:mm:ss";
+  final DateTime dateTime = DateTime.now();
+
   FirebaseAnalytics.instance.logEvent(
-    name: 'onAlarmEverySixHourCallback',
-    parameters: {
-      'status': 'start',
-    },
+    name: 'onAlarmEverySixHourCallbackStart',
+    parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
   );
   await Scheduler.handleAlarmEverySixHour().catchError((err, stack) {
     FirebaseCrashlytics.instance.recordError(err, stack);
   }).then((_) {
+    final DateTime dateTime = DateTime.now();
+
     FirebaseAnalytics.instance.logEvent(
-      name: 'onAlarmEverySixHourCallback',
-      parameters: {
-        'status': 'success',
-      },
+      name: 'onAlarmEverySixHourCallbackSuccess',
+      parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
     );
   });
 }
@@ -56,7 +59,6 @@ class Scheduler {
   static Future<void> _setPrayerEveryMidnightTimesAlarm() async {
     try {
       int alarmId = await PrefesUtils.getInt(PrefesUtils.midnightAlarmId);
-      Logger().i("_alarmMidnightCallback id: $alarmId");
       if (alarmId != midnightAlarmId) {
         await _generateMidnightAlarm(midnightAlarmId);
         PrefesUtils.setInt(PrefesUtils.midnightAlarmId, midnightAlarmId);
@@ -73,7 +75,7 @@ class Scheduler {
     Duration initialDelay = delay.difference(now);
     Logger().i("_testAlarm id: $alarmId $delay - $now");
     await AndroidAlarmManager.periodic(
-        const Duration(seconds: 30), alarmId, onAlarmEverySixHourCallback,
+        const Duration(minutes: 5), alarmId, onAlarmEverySixHourCallback,
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),

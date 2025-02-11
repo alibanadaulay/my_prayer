@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
@@ -10,6 +11,8 @@ class PrayerItem extends StatefulWidget {
   final String time;
   final bool isNextPrayer;
   final bool isSound;
+  final bool isFirst;
+  final bool isLast;
 
   const PrayerItem({
     super.key,
@@ -17,6 +20,8 @@ class PrayerItem extends StatefulWidget {
     required this.name,
     required this.time,
     required this.isSound,
+    required this.isFirst,
+    required this.isLast,
     this.isNextPrayer = false,
   });
 
@@ -41,6 +46,7 @@ class _PrayerItemState extends State<PrayerItem> {
     return Consumer<HomeViewModel>(
       builder: (context, homeViewModel, child) {
         return InkWell(
+          borderRadius: _getBorderRadius(widget.isFirst, widget.isLast),
           onTap: () {
             showCustomDialog(
               context,
@@ -63,13 +69,15 @@ class _PrayerItemState extends State<PrayerItem> {
               },
             );
           },
-          child: Card(
-            margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-            color: widget.isNextPrayer ? Colors.blueAccent : Colors.black38,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: _getBorderRadius(widget.isFirst, widget.isLast),
+              color: getPrayerColor(context, widget.isNextPrayer),
+            ),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
                   child: _content(),
                 ),
               ],
@@ -80,14 +88,25 @@ class _PrayerItemState extends State<PrayerItem> {
     );
   }
 
+  BorderRadius _getBorderRadius(bool isFirst, bool isLast) {
+    if (isFirst) {
+      return BorderRadius.only(
+        topLeft: Radius.circular(12.0),
+        topRight: Radius.circular(12.0),
+      );
+    }
+    if (isLast) {
+      return BorderRadius.only(
+        bottomLeft: Radius.circular(12.0),
+        bottomRight: Radius.circular(12.0),
+      );
+    }
+    return BorderRadius.all(Radius.zero);
+  }
+
   Widget _content() {
     return Row(
       children: [
-        FaIcon(
-          isSound ? FontAwesomeIcons.volumeHigh : FontAwesomeIcons.volumeXmark,
-          color: Colors.white54,
-          size: 24.0,
-        ),
         const SizedBox(width: 8),
         Text(
           widget.name,
@@ -98,6 +117,13 @@ class _PrayerItemState extends State<PrayerItem> {
           widget.time,
           style: const TextStyle(color: Colors.white, fontSize: 24.0),
         ),
+        const SizedBox(width: 8),
+        FaIcon(
+          isSound ? FontAwesomeIcons.volumeHigh : FontAwesomeIcons.volumeXmark,
+          color: Colors.white54,
+          size: 24.0,
+        ),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -128,4 +154,15 @@ class _PrayerItemState extends State<PrayerItem> {
       },
     );
   }
+}
+
+Color getPrayerColor(BuildContext context, bool isNextPrayer) {
+  if (isNextPrayer) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? CupertinoColors.darkBackgroundGray // Dark mode color
+        : Colors.black54; // Light mode color
+  }
+  return Theme.of(context).brightness == Brightness.dark
+      ? Colors.black54
+      : Colors.white54; // Default color
 }

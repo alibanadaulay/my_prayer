@@ -92,6 +92,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Flutter Demo',
         themeMode: ThemeMode.system,
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple, brightness: Brightness.dark),
+          scaffoldBackgroundColor: Colors.black, // Dark mode background
+          appBarTheme: AppBarTheme(backgroundColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,

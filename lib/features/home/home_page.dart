@@ -155,53 +155,65 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       builder: (context, homeViewModel, child) {
         switch (homeViewModel.prayerListState) {
           case ViewState.loading:
-            return Column(children: [
-              Shimmer(
-                duration: const Duration(seconds: 3),
-                interval: const Duration(seconds: 1),
-                color: Colors.white,
-                colorOpacity: 0.3,
-                enabled: true,
-                direction: const ShimmerDirection.fromLTRB(),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 48,
-                  color: Colors.grey,
-                ),
-              ),
-              SizedBox(
-                height: 16.0,
-              ),
-              Shimmer(
-                duration: const Duration(seconds: 3),
-                interval: const Duration(seconds: 1),
-                color: Colors.white,
-                colorOpacity: 0.3,
-                enabled: true,
-                direction: const ShimmerDirection.fromLTRB(),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 48,
-                  color: Colors.grey,
-                ),
-              ),
-            ]);
+          // return Column(children: [
+          //   Shimmer(
+          //     duration: const Duration(seconds: 3),
+          //     interval: const Duration(seconds: 1),
+          //     color: Colors.white,
+          //     colorOpacity: 0.3,
+          //     enabled: true,
+          //     direction: const ShimmerDirection.fromLTRB(),
+          //     child: Container(
+          //       width: MediaQuery.of(context).size.width,
+          //       height: 48,
+          //       color: Colors.grey,
+          //     ),
+          //   ),
+          //   SizedBox(
+          //     height: 16.0,
+          //   ),
+          //   Shimmer(
+          //     duration: const Duration(seconds: 3),
+          //     interval: const Duration(seconds: 1),
+          //     color: Colors.white,
+          //     colorOpacity: 0.3,
+          //     enabled: true,
+          //     direction: const ShimmerDirection.fromLTRB(),
+          //     child: Container(
+          //       width: MediaQuery.of(context).size.width,
+          //       height: 48,
+          //       color: Colors.grey,
+          //     ),
+          //   ),
+          // ]);
           default:
-            return Container(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: homeViewModel.prayerTimes.length,
-                itemBuilder: (context, index) {
-                  PrayerTimeModel item = homeViewModel.prayerTimes[index];
-                  return PrayerItem(
-                    key: Key("${item.id}"),
-                    id: item.id,
-                    isSound: item.isSound,
-                    name: item.name,
-                    time: item.time,
-                    isNextPrayer: item.isNextPrayer,
-                  );
-                },
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              color: Colors.transparent,
+              margin: const EdgeInsets.all(16.0),
+              child: Padding(
+                padding: EdgeInsets.zero,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: homeViewModel.prayerTimes.length,
+                  itemBuilder: (context, index) {
+                    PrayerTimeModel item = homeViewModel.prayerTimes[index];
+                    return PrayerItem(
+                      key: Key("${item.id}"),
+                      id: item.id,
+                      isSound: item.isSound,
+                      name: item.name,
+                      time: item.time,
+                      isNextPrayer: item.isNextPrayer,
+                      isFirst: index == 0,
+                      isLast: index == homeViewModel.prayerTimes.length - 1,
+                    );
+                  },
+                ),
               ),
             );
         }

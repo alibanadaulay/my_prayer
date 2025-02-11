@@ -5,22 +5,28 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse details) async {
   await Firebase.initializeApp();
+  String uuid = Uuid().v4();
+  String pattern = "dd-MM-yyyy hh:mm:ss";
+  final DateTime dateTime = DateTime.now();
   FirebaseAnalytics.instance.logEvent(
-    name: 'notification_response',
+    name: 'onBackgroundNotificationResponseStart',
     parameters: {
-      'status': 'start',
       'payload': details.payload ?? 'unknown',
       'notification_id': details.id.toString(),
+      'time': DateFormat(pattern).format(dateTime),
+      'uuid': uuid
     },
   );
 
@@ -28,12 +34,14 @@ void onBackgroundNotificationResponse(NotificationResponse details) async {
       .catchError((err, stack) {
     FirebaseCrashlytics.instance.recordError(err, stack);
   }).then((_) {
+    final DateTime dateTime = DateTime.now();
     FirebaseAnalytics.instance.logEvent(
-      name: 'notification_response',
+      name: 'onBackgroundNotificationResponseSuccess',
       parameters: {
-        'status': 'success',
         'payload': details.payload ?? 'unknown',
         'notification_id': details.id.toString(),
+        'time': DateFormat(pattern).format(dateTime),
+        'uuid': uuid
       },
     );
   });
@@ -94,7 +102,6 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  @pragma('vm:entry-point')
   static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
     tz.initializeTimeZones();

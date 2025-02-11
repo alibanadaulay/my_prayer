@@ -22,6 +22,7 @@ class HomeViewModel extends ChangeNotifier {
   String remainingTime = "00:00:00";
   String timePrayer = "-";
   String currenPrayer = "-";
+  int prayerId = 1;
   int seconds = 0;
   List<PrayerTimeModel> prayerTimes = [];
   String? _isoCountryCode = "";
@@ -88,8 +89,22 @@ class HomeViewModel extends ChangeNotifier {
     currenPrayer = result.name;
     timePrayer = result.time;
     _todayDate = result.date;
+    await _addCurrentToList(result);
     notifyListeners();
     PrefesUtils.setInt(PrefesUtils.currentPrayer, result.id);
+  }
+
+  Future<void> _addCurrentToList(PrayerTimeModel prayerTimeModel) async {
+    if (prayerTimes.isNotEmpty) {
+      prayerTimes = prayerTimes.map((item) {
+        if (item.id == prayerTimeModel.id) {
+          item.isNextPrayer = true;
+          return item;
+        }
+        item.isNextPrayer = false;
+        return item;
+      }).toList();
+    }
   }
 
   void setNewLocation() async {
