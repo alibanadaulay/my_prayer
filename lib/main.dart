@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
@@ -23,6 +26,8 @@ void main() async {
   // await dotenv.load(fileName: "assets/.env");
 
   await init();
+
+  _firebaseErrorCatcher();
 
   AdhanClientDio adhan = AdhanClientDio();
 
@@ -50,14 +55,23 @@ void main() async {
 Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Firebase.initializeApp();
+
   await PrefesUtils.getInstance();
   await hiveInit();
 
   await AndroidAlarmManager.initialize();
   await NotificationService.initialize();
+}
 
-  // FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+void _firebaseErrorCatcher() {
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 }
 
 Future<void> hiveInit() async {

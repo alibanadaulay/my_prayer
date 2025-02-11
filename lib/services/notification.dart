@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:logger/logger.dart';
@@ -10,16 +13,35 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 @pragma('vm:entry-point')
-void onBackgroundNotificationResponse(NotificationResponse details) {
-  unawaited(NotificationService.updateDate(details.payload, details.id));
+void onBackgroundNotificationResponse(NotificationResponse details) async {
+  await Firebase.initializeApp();
+  FirebaseAnalytics.instance.logEvent(
+    name: 'notification_response',
+    parameters: {
+      'status': 'start',
+      'payload': details.payload ?? 'unknown',
+      'notification_id': details.id.toString(),
+    },
+  );
+
+  await NotificationService.updateDate(details.payload, details.id)
+      .catchError((err, stack) {
+    FirebaseCrashlytics.instance.recordError(err, stack);
+  }).then((_) {
+    FirebaseAnalytics.instance.logEvent(
+      name: 'notification_response',
+      parameters: {
+        'status': 'success',
+        'payload': details.payload ?? 'unknown',
+        'notification_id': details.id.toString(),
+      },
+    );
+  });
 }
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
       _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  static Future<void> onDidReceiveBackgroundNotificationResponse(
-      NotificationResponse details) async {}
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -51,7 +73,7 @@ class NotificationService {
       PrefesUtils.getInstance();
       List<String> part = payload.split('.');
       int nextPrayerId = id ?? 0 + 1;
-      if (nextPrayerId >= 5) {
+      if (nextPrayerId > 5) {
         nextPrayerId = 0;
       }
       PrefesUtils.setInt(PrefesUtils.currentPrayer, nextPrayerId);

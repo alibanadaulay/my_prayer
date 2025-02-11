@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -17,8 +20,24 @@ import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 
 @pragma('vm:entry-point')
-void onAlarmEverySixHourCallback() {
-  unawaited(Scheduler.handleAlarmEverySixHour());
+void onAlarmEverySixHourCallback() async {
+  await Firebase.initializeApp();
+  FirebaseAnalytics.instance.logEvent(
+    name: 'onAlarmEverySixHourCallback',
+    parameters: {
+      'status': 'start',
+    },
+  );
+  await Scheduler.handleAlarmEverySixHour().catchError((err, stack) {
+    FirebaseCrashlytics.instance.recordError(err, stack);
+  }).then((_) {
+    FirebaseAnalytics.instance.logEvent(
+      name: 'onAlarmEverySixHourCallback',
+      parameters: {
+        'status': 'success',
+      },
+    );
+  });
 }
 
 class Scheduler {

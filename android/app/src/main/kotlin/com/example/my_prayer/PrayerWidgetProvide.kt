@@ -90,6 +90,13 @@ class PrayerWidgetProvider : AppWidgetProvider() {
 
                 // Display prayer data (or default message if null)
                 prayerDataTemp.let {
+                    views.setInt(R.id.ll_fajr, "setBackgroundResource", android.R.color.transparent);
+                    views.setInt(R.id.ll_sunrise, "setBackgroundResource", android.R.color.transparent);
+                    views.setInt(R.id.ll_dhuhr, "setBackgroundResource", android.R.color.transparent);
+                    views.setInt(R.id.ll_asr, "setBackgroundResource", android.R.color.transparent);
+                    views.setInt(R.id.ll_maghrib, "setBackgroundResource", android.R.color.transparent);
+                    views.setInt(R.id.ll_isha, "setBackgroundResource", android.R.color.transparent);
+
                     val fajr = prayerDataTemp["Fajr"]
                     val sunrise = prayerDataTemp["Sunrise"]
                     val dhuhr = prayerDataTemp["Dhuhr"]
@@ -198,7 +205,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         val jsonString = getPrayerTimesFromDataStore(context)
 
         return if (jsonString.isNotEmpty()) {
-            val jsonObject = JSONObject(jsonString)  // Convert JSON string to JSONObject
+            val jsonObject = JSONObject(jsonString)
             val map = mutableMapOf<String, String>()
 
             for (key in jsonObject.keys()) {
@@ -206,7 +213,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
             }
             map
         } else {
-            null  // Return null if no map is found
+            null
         }
     }
 }
