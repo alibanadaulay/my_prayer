@@ -43,17 +43,43 @@ void onAlarmEverySixHourCallback() async {
   });
 }
 
+@pragma('vm:entry-point')
+void alarmFirstDayAtNewMonth() async {
+  await Firebase.initializeApp();
+  String uuid = Uuid().v4();
+  String pattern = "dd-MM-yyyy hh:mm:ss";
+  final DateTime dateTime = DateTime.now();
+
+  FirebaseAnalytics.instance.logEvent(
+    name: 'alarmFirstDayAtNewMonthStart',
+    parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
+  );
+
+  try {
+    await Scheduler.getPrayerForOneMonth();
+    final DateTime successDt = DateTime.now();
+    FirebaseAnalytics.instance.logEvent(
+      name: 'alarmFirstDayAtNewMonthSuccess',
+      parameters: {'time': DateFormat(pattern).format(successDt), 'uuid': uuid},
+    );
+  } catch (e, stack) {
+    FirebaseCrashlytics.instance.recordError(e, stack);
+  } finally {
+    await Scheduler.setFirstDayAtMonth();
+  }
+}
+
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
-  static List<String> hours = ["00:05", "06:05", "12:05", "18:05"];
+  static List<String> hours = ["00:10", "06:10", "12:10", "18:10"];
   static int midnightAlarmId = 1;
 
   static Future<void> initScheduler() async {
     _setPrayerEveryMidnightTimesAlarm();
     AndroidAlarmManager.cancel(2);
     // _testAlarm(2);
-    // _setFirstDayAtMonth();
+    setFirstDayAtMonth();
   }
 
   static Future<void> _setPrayerEveryMidnightTimesAlarm() async {
@@ -107,21 +133,14 @@ class Scheduler {
     }
   }
 
-  static Future<void> _setFirstDayAtMonth() async {
+  static Future<void> setFirstDayAtMonth() async {
     Logger().d("_setFirstDayAtMonth");
-    Duration initialDelay = await _getMidnightDayOne();
+
+    DateTime nextMonth = await _getMidnightDayOne();
     final int alarmId = 1;
-    await AndroidAlarmManager.periodic(
-      const Duration(days: 30),
-      alarmId,
-      () async {
-        await _getCityName();
-        _getPrayerForOneMonth();
-      },
-      startAt: DateTime.now().add(initialDelay),
-      exact: true,
-      wakeup: false,
-    );
+    await AndroidAlarmManager.oneShotAt(
+        nextMonth, alarmId, alarmFirstDayAtNewMonth,
+        exact: true, wakeup: false);
   }
 
   static Future<Duration> _getUntilMidnight() async {
@@ -146,10 +165,9 @@ class Scheduler {
     return nextMidnight.difference(now);
   }
 
-  static Future<Duration> _getMidnightDayOne() async {
+  static Future<DateTime> _getMidnightDayOne() async {
     DateTime now = DateTime.now();
-    DateTime nextMidnight = DateTime(now.year, now.month + 1);
-    return nextMidnight.difference(now);
+    return DateTime(now.year, now.month + 1, 1);
   }
 
   static Future<void> _setPrayerTiemToWidget(
@@ -247,7 +265,7 @@ class Scheduler {
     }
   }
 
-  static void _getPrayerForOneMonth() async {
+  static Future<void> getPrayerForOneMonth() async {
     DateTime today = DateTime.now();
 
     String adhanUrl =

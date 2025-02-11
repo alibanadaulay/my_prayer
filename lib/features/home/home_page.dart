@@ -7,7 +7,6 @@ import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer_animation/shimmer_animation.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
