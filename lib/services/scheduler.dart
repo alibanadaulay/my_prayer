@@ -19,9 +19,10 @@ import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:uuid/uuid.dart';
+import 'package:workmanager/workmanager.dart';
 
 @pragma('vm:entry-point')
-void onAlarmEverySixHourCallback() async {
+void onAlarmEverySixHourCallback(bool fromWorkmanager) async {
   await Firebase.initializeApp();
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
@@ -29,7 +30,11 @@ void onAlarmEverySixHourCallback() async {
 
   FirebaseAnalytics.instance.logEvent(
     name: 'onAlarmEverySixHourCallbackStart',
-    parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
+    parameters: {
+      'time': DateFormat(pattern).format(dateTime),
+      'uuid': uuid,
+      'is_from_workmanager': fromWorkmanager
+    },
   );
   await Scheduler.handleAlarmEverySixHour().catchError((err, stack) {
     FirebaseCrashlytics.instance.recordError(err, stack);
@@ -38,13 +43,17 @@ void onAlarmEverySixHourCallback() async {
 
     FirebaseAnalytics.instance.logEvent(
       name: 'onAlarmEverySixHourCallbackSuccess',
-      parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
+      parameters: {
+        'time': DateFormat(pattern).format(dateTime),
+        'uuid': uuid,
+        'is_from_workmanager': fromWorkmanager
+      },
     );
   });
 }
 
 @pragma('vm:entry-point')
-void alarmFirstDayAtNewMonth() async {
+void alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
   await Firebase.initializeApp();
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
@@ -52,7 +61,11 @@ void alarmFirstDayAtNewMonth() async {
 
   FirebaseAnalytics.instance.logEvent(
     name: 'alarmFirstDayAtNewMonthStart',
-    parameters: {'time': DateFormat(pattern).format(dateTime), 'uuid': uuid},
+    parameters: {
+      'time': DateFormat(pattern).format(dateTime),
+      'uuid': uuid,
+      'is_from_workmanager': fromWorkmanager
+    },
   );
 
   try {
@@ -60,7 +73,11 @@ void alarmFirstDayAtNewMonth() async {
     final DateTime successDt = DateTime.now();
     FirebaseAnalytics.instance.logEvent(
       name: 'alarmFirstDayAtNewMonthSuccess',
-      parameters: {'time': DateFormat(pattern).format(successDt), 'uuid': uuid},
+      parameters: {
+        'time': DateFormat(pattern).format(successDt),
+        'uuid': uuid,
+        'is_from_workmanager': fromWorkmanager
+      },
     );
   } catch (e, stack) {
     FirebaseCrashlytics.instance.recordError(e, stack);
@@ -69,16 +86,33 @@ void alarmFirstDayAtNewMonth() async {
   }
 }
 
+@pragma('vm:entry-point')
+void handlerWorkManager() {
+  Workmanager().executeTask((task, inputData) {
+    switch (task) {
+      case Scheduler.midnightAlarm:
+        onAlarmEverySixHourCallback(true);
+      default:
+        alarmFirstDayAtNewMonth(true);
+    }
+    return Future.value(true);
+  });
+}
+
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
   static List<String> hours = ["00:10", "06:10", "12:10", "18:10"];
-  static int midnightAlarmId = 1;
+  static const String midnightAlarm = "midnight_alarm";
+  static const String firstDayNewMonth = "firstDayNewMonth";
+
+  static const int midnightAlarmId = 0;
+  static const int firstDayNewMonthId = 1;
 
   static Future<void> initScheduler() async {
+    Workmanager().initialize(onAlarmEverySixHourCallback, isInDebugMode: true);
     _setPrayerEveryMidnightTimesAlarm();
     AndroidAlarmManager.cancel(2);
-    // _testAlarm(2);
     setFirstDayAtMonth();
   }
 
@@ -108,10 +142,16 @@ class Scheduler {
         rescheduleOnReboot: true);
   }
 
-  static Future<void> _generateMidnightAlarm(int alarmId) async {
+  static Future<void> _generateMidnightAlarm(int midnightAlarmId) async {
     Duration initialDelay = await _getUntilMidnight();
+
+    Workmanager().registerPeriodicTask(
+        midnightAlarmId.toString(), midnightAlarm,
+        frequency: Duration(hours: 6), initialDelay: initialDelay);
     await AndroidAlarmManager.periodic(
-        const Duration(hours: 6), alarmId, onAlarmEverySixHourCallback,
+        const Duration(hours: 6), midnightAlarmId, () {
+      onAlarmEverySixHourCallback(false);
+    },
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),
@@ -137,10 +177,13 @@ class Scheduler {
     Logger().d("_setFirstDayAtMonth");
 
     DateTime nextMonth = await _getMidnightDayOne();
-    final int alarmId = 1;
-    await AndroidAlarmManager.oneShotAt(
-        nextMonth, alarmId, alarmFirstDayAtNewMonth,
-        exact: true, wakeup: false);
+    Duration nextMonthDuration = nextMonth.difference(DateTime.now());
+    Workmanager().registerOneOffTask(
+        firstDayNewMonthId.toString(), firstDayNewMonth,
+        initialDelay: nextMonthDuration);
+    await AndroidAlarmManager.oneShotAt(nextMonth, firstDayNewMonthId, () {
+      alarmFirstDayAtNewMonth(false);
+    }, exact: true, wakeup: false);
   }
 
   static Future<Duration> _getUntilMidnight() async {
