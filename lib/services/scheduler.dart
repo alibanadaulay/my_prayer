@@ -23,7 +23,9 @@ import 'package:workmanager/workmanager.dart';
 
 @pragma('vm:entry-point')
 void onAlarmEverySixHourCallback(bool fromWorkmanager) async {
-  await Firebase.initializeApp();
+  if (!fromWorkmanager) {
+    await Firebase.initializeApp();
+  }
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
   final DateTime dateTime = DateTime.now();
@@ -36,25 +38,22 @@ void onAlarmEverySixHourCallback(bool fromWorkmanager) async {
       'is_from_workmanager': fromWorkmanager
     },
   );
-  await Scheduler.handleAlarmEverySixHour().catchError((err, stack) {
-    FirebaseCrashlytics.instance.recordError(err, stack);
-  }).then((_) {
-    final DateTime dateTime = DateTime.now();
+  await Scheduler.handleAlarmEverySixHour();
+  final DateTime lastTime = DateTime.now();
 
-    FirebaseAnalytics.instance.logEvent(
-      name: 'onAlarmEverySixHourCallbackSuccess',
-      parameters: {
-        'time': DateFormat(pattern).format(dateTime),
-        'uuid': uuid,
-        'is_from_workmanager': fromWorkmanager
-      },
-    );
+  FirebaseAnalytics.instance
+      .logEvent(name: 'onAlarmEverySixHourCallbackSuccess', parameters: {
+    'time': DateFormat(pattern).format(lastTime),
+    'uuid': uuid,
+    'is_from_workmanager': fromWorkmanager
   });
 }
 
 @pragma('vm:entry-point')
 void alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
-  await Firebase.initializeApp();
+  if (!fromWorkmanager) {
+    await Firebase.initializeApp();
+  }
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
   final DateTime dateTime = DateTime.now();
@@ -87,22 +86,28 @@ void alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
 }
 
 @pragma('vm:entry-point')
-void handlerWorkManager() {
+void handlerWorkManager() async {
+  await Firebase.initializeApp();
   Workmanager().executeTask((task, inputData) {
-    switch (task) {
-      case Scheduler.midnightAlarm:
-        onAlarmEverySixHourCallback(true);
-      default:
-        alarmFirstDayAtNewMonth(true);
+    try {
+      switch (task) {
+        case 'midnight_alarm':
+          onAlarmEverySixHourCallback(true);
+        default:
+          alarmFirstDayAtNewMonth(true);
+      }
+      return Future.value(true);
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
+      return Future.error(e);
     }
-    return Future.value(true);
   });
 }
 
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
-  static List<String> hours = ["00:10", "06:10", "12:10", "18:10"];
+  static List<String> hours = ['00', '03', '06', '09', '12', '15', '18', '21'];
   static const String midnightAlarm = "midnight_alarm";
   static const String firstDayNewMonth = "firstDayNewMonth";
 
@@ -110,7 +115,7 @@ class Scheduler {
   static const int firstDayNewMonthId = 1;
 
   static Future<void> initScheduler() async {
-    Workmanager().initialize(onAlarmEverySixHourCallback, isInDebugMode: true);
+    Workmanager().initialize(handlerWorkManager, isInDebugMode: true);
     _setPrayerEveryMidnightTimesAlarm();
     AndroidAlarmManager.cancel(2);
     setFirstDayAtMonth();
@@ -147,7 +152,7 @@ class Scheduler {
 
     Workmanager().registerPeriodicTask(
         midnightAlarmId.toString(), midnightAlarm,
-        frequency: Duration(hours: 6), initialDelay: initialDelay);
+        frequency: Duration(hours: 3), initialDelay: initialDelay);
     await AndroidAlarmManager.periodic(
         const Duration(hours: 6), midnightAlarmId, () {
       onAlarmEverySixHourCallback(false);
@@ -191,9 +196,8 @@ class Scheduler {
     DateTime? temp;
 
     for (String time in hours) {
-      List<String> parts = time.split(":");
-      DateTime compare = DateTime(now.year, now.month, now.day,
-          int.parse(parts[0]), int.parse(parts[1]));
+      DateTime compare =
+          DateTime(now.year, now.month, now.day, int.parse(time), 5);
 
       if (compare.isAfter(now) && (temp == null || compare.isBefore(temp))) {
         temp = compare;
@@ -280,6 +284,7 @@ class Scheduler {
       List<PrayerTimeModel> prayerTimeList) async {
     final DateTime dateTime = DateTime.now();
     try {
+      NotificationService.initialize();
       NotificationService.cancelAllPendingNotification();
       for (PrayerTimeModel item in prayerTimeList) {
         List<String> parts = item.time.split(':');

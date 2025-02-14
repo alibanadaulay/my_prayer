@@ -30,11 +30,8 @@ void onBackgroundNotificationResponse(NotificationResponse details) async {
     },
   );
 
-  await NotificationService.updateDate(details.payload, details.id)
-      .catchError((err, stack) {
-    FirebaseCrashlytics.instance.recordError(err, stack);
-  }).then((_) {
-    final DateTime dateTime = DateTime.now();
+  try {
+    await NotificationService.updateDate(details.payload, details.id);
     FirebaseAnalytics.instance.logEvent(
       name: 'onBackgroundNotificationResponseSuccess',
       parameters: {
@@ -44,7 +41,9 @@ void onBackgroundNotificationResponse(NotificationResponse details) async {
         'uuid': uuid
       },
     );
-  });
+  } catch (e, stack) {
+    FirebaseCrashlytics.instance.recordError(e, stack);
+  }
 }
 
 class NotificationService {
