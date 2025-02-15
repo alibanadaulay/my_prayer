@@ -219,21 +219,16 @@ class Scheduler {
 
   static Future<void> _setPrayerTiemToWidget(
       List<PrayerTimeModel> prayerTimes) async {
-    try {
-      Map<String, String> prayerTimesMap = {
-        'Fajr': prayerTimes[0].time,
-        'Sunrise': prayerTimes[1].time,
-        'Dhuhr': prayerTimes[2].time,
-        'Asr': prayerTimes[3].time,
-        'Maghrib': prayerTimes[4].time,
-        'Isha': prayerTimes[5].time,
-      };
+    Map<String, String> prayerTimesMap = {
+      'Fajr': prayerTimes[0].time,
+      'Sunrise': prayerTimes[1].time,
+      'Dhuhr': prayerTimes[2].time,
+      'Asr': prayerTimes[3].time,
+      'Maghrib': prayerTimes[4].time,
+      'Isha': prayerTimes[5].time,
+    };
 
-      PrefesUtils.setString(
-          PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
-    } catch (e) {
-      Logger().e("_setPrayerTiemToWidget $e");
-    }
+    PrefesUtils.setString(PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
   }
 
   static Future<void> _setArabicDate(String date) async {
