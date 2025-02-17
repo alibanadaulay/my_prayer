@@ -7,6 +7,7 @@ class PrefesUtils {
   static const String arabicDate = "arabicDate";
   static const String prayerTimes = "prayerTimes";
   static const String currentPrayer = "currentPrayer";
+  static const String isWorkManagerThreeHour = "isWorkManagerThreeHour";
 
   static PrefesUtils? _instance;
   static SharedPreferencesAsync? _preferences;
@@ -57,8 +58,8 @@ class PrefesUtils {
   }
 
   /// Get a double value
-  static double? getDouble(String key) {
-    // return _preferences?.getDouble(key);
+  static Future<double?> getDouble(String key) async {
+    return await _preferences?.getDouble(key) ?? 0.toDouble();
   }
 
   /// Save a List<String>

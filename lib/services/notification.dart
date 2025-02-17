@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
@@ -16,6 +17,7 @@ import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse details) async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
@@ -116,8 +118,6 @@ class NotificationService {
         return;
       }
     }
-    Logger().i(
-        "${prayerNotificationModel.name}, sound : ${prayerNotificationModel.isSound}");
 
     AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
@@ -148,7 +148,5 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
-    Logger().i(
-        "${prayerNotificationModel.name} ${androidPlatformChannelSpecifics.channelId} : $time");
   }
 }

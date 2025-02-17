@@ -20,8 +20,8 @@ class HomeViewModel extends ChangeNotifier {
   String arabicDate = "28 Rabiul Awwal 1445 H";
   String _todayDate = "";
   String remainingTime = "00:00:00";
-  String timePrayer = "-";
-  String currenPrayer = "-";
+  String timePrayer = "";
+  String currenPrayer = "";
   int prayerId = 1;
   int seconds = 0;
   List<PrayerTimeModel> prayerTimes = [];
