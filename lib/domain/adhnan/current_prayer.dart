@@ -10,7 +10,7 @@ class GetCurrentPrayerUseCases {
       return PrayerTimeModel(id: 0, name: "Subuh", time: "05:00", date: "");
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < prayers.length; i++) {
       PrayerTimeModel targetTime = prayers[i];
       DateTime target = DateTime(
         now.year,
@@ -19,7 +19,7 @@ class GetCurrentPrayerUseCases {
         int.parse(targetTime.time.split(":")[0]),
         int.parse(targetTime.time.split(":")[1]),
       );
-      Logger().d("$now $target");
+      Logger().d("$now $target ${targetTime.name} ${prayers.length}");
 
       if (target.hour > now.hour ||
           (target.hour == now.hour && target.minute > now.minute)) {
