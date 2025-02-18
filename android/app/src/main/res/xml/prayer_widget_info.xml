@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="300dp"
     android:minHeight="80dp"
-    android:updatePeriodMillis="1800000"
+    android:updatePeriodMillis="900000"
     android:initialLayout="@layout/prayer_list"
     android:widgetCategory="home_screen"
     android:resizeMode="horizontal|vertical" />

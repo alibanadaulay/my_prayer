@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 
 class GetCurrentPrayerUseCases {
@@ -18,6 +19,7 @@ class GetCurrentPrayerUseCases {
         int.parse(targetTime.time.split(":")[0]),
         int.parse(targetTime.time.split(":")[1]),
       );
+      Logger().d("$now $target");
 
       if (target.hour > now.hour ||
           (target.hour == now.hour && target.minute > now.minute)) {
@@ -25,6 +27,6 @@ class GetCurrentPrayerUseCases {
       }
     }
 
-    return prayers.first;
+    return prayers.last;
   }
 }

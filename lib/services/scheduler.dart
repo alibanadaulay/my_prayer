@@ -16,6 +16,7 @@ import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_times_month_response.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
@@ -32,7 +33,7 @@ Future<void> onAlarmEverySixHourCallback(bool fromWorkmanager) async {
   String pattern = "dd-MM-yyyy hh:mm:ss";
   final DateTime dateTime = DateTime.now();
 
-  FirebaseAnalytics.instance.logEvent(
+  await FirebaseAnalytics.instance.logEvent(
     name: 'onAlarmEverySixHourCallbackStart',
     parameters: {
       'time': DateFormat(pattern).format(dateTime),
@@ -43,7 +44,7 @@ Future<void> onAlarmEverySixHourCallback(bool fromWorkmanager) async {
   await Scheduler.handleAlarmEverySixHour();
   final DateTime lastTime = DateTime.now();
 
-  FirebaseAnalytics.instance
+  await FirebaseAnalytics.instance
       .logEvent(name: 'onAlarmEverySixHourCallbackSuccess', parameters: {
     'time': DateFormat(pattern).format(lastTime),
     'uuid': uuid,
@@ -55,14 +56,13 @@ Future<void> onAlarmEverySixHourCallback(bool fromWorkmanager) async {
 Future<void> alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
   if (!fromWorkmanager) {
     WidgetsFlutterBinding.ensureInitialized();
-
     await Firebase.initializeApp();
   }
   String uuid = Uuid().v4();
   String pattern = "dd-MM-yyyy hh:mm:ss";
   final DateTime dateTime = DateTime.now();
 
-  FirebaseAnalytics.instance.logEvent(
+  await FirebaseAnalytics.instance.logEvent(
     name: 'alarmFirstDayAtNewMonthStart',
     parameters: {
       'time': DateFormat(pattern).format(dateTime),
@@ -74,7 +74,7 @@ Future<void> alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
   try {
     await Scheduler.getPrayerForOneMonth();
     final DateTime successDt = DateTime.now();
-    FirebaseAnalytics.instance.logEvent(
+    await FirebaseAnalytics.instance.logEvent(
       name: 'alarmFirstDayAtNewMonthSuccess',
       parameters: {
         'time': DateFormat(pattern).format(successDt),
@@ -82,10 +82,17 @@ Future<void> alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
         'is_from_workmanager': fromWorkmanager.toString()
       },
     );
-  } catch (e, stack) {
-    FirebaseCrashlytics.instance.recordError(e, stack);
   } finally {
     await Scheduler.setFirstDayAtMonth();
+    final DateTime successDt = DateTime.now();
+    await FirebaseAnalytics.instance.logEvent(
+      name: 'setFirstDayAtMonthAtFinally',
+      parameters: {
+        'time': DateFormat(pattern).format(successDt),
+        'uuid': uuid,
+        'is_from_workmanager': fromWorkmanager.toString()
+      },
+    );
   }
 }
 
@@ -98,13 +105,12 @@ void handlerWorkManager() async {
       switch (task) {
         case 'midnight_alarm':
           await onAlarmEverySixHourCallback(true);
-
         default:
           await alarmFirstDayAtNewMonth(true);
       }
       return Future.value(true);
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      await FirebaseCrashlytics.instance.recordError(e, stack);
       return Future.error(e);
     }
   });
@@ -133,6 +139,7 @@ class Scheduler {
     });
     _setPrayerEveryMidnightTimesAlarm();
     AndroidAlarmManager.cancel(2);
+    // _testAlarm(2);
     setFirstDayAtMonth();
   }
 
@@ -158,8 +165,9 @@ class Scheduler {
     DateTime delay =
         DateTime(now.year, now.month, now.day, now.hour, now.minute + 3);
     Duration initialDelay = delay.difference(now);
-    await AndroidAlarmManager.periodic(
-        const Duration(minutes: 5), alarmId, onAlarmEverySixHourCallback,
+    await AndroidAlarmManager.periodic(const Duration(minutes: 5), alarmId, () {
+      onAlarmEverySixHourCallback(false);
+    },
         exact: true,
         wakeup: true,
         startAt: DateTime.now().add(initialDelay),
@@ -201,10 +209,11 @@ class Scheduler {
       if (prayerTimes.isEmpty) {
         return;
       }
-      PrefesUtils.getInstance();
+      await PrefesUtils.getInstance();
       await _generateNotification(prayerTimes);
       await _setPrayerTiemToWidget(prayerTimes);
       await _setArabicDate(prayerTimes[4].time);
+      await NativeBridge.triggerUpdate();
     } catch (e) {
       Logger().e("_alarmMidnightCallback $e");
     }
@@ -258,13 +267,14 @@ class Scheduler {
       'Isha': prayerTimes[5].time,
     };
 
-    PrefesUtils.setString(PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
+    await PrefesUtils.setString(
+        PrefesUtils.prayerTimes, jsonEncode(prayerTimesMap));
   }
 
   static Future<void> _setArabicDate(String date) async {
     try {
       String arabicDate = "${await CalenderUtils.getHijriDate(date)}H";
-      PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
+      await PrefesUtils.setString(PrefesUtils.arabicDate, arabicDate);
     } catch (e) {
       Logger().e("_setArabicDate $e");
     }
@@ -309,8 +319,8 @@ class Scheduler {
       List<PrayerTimeModel> prayerTimeList) async {
     final DateTime dateTime = DateTime.now();
     try {
-      NotificationService.initialize();
-      NotificationService.cancelAllPendingNotification();
+      await NotificationService.initialize();
+      await NotificationService.cancelAllPendingNotification();
       for (PrayerTimeModel item in prayerTimeList) {
         List<String> parts = item.time.split(':');
 
@@ -331,7 +341,7 @@ class Scheduler {
                 time: item.time,
                 soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
                 name: item.name);
-        NotificationService.scheduleAlarm(prayreNotificationModel);
+        await NotificationService.scheduleAlarm(prayreNotificationModel);
       }
     } catch (e) {
       Logger().e("_generateNotification $e");

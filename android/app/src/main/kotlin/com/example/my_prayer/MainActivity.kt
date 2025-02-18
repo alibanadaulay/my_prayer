@@ -2,7 +2,6 @@ package com.example.my_prayer
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -17,7 +16,7 @@ class MainActivity: FlutterActivity(){
 
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor, CHANNEL).setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler  { call, result ->
             if (call.method == "updatePrayerWidget") {
                 val prayerData = call.arguments as Map<String, String>
 
@@ -28,7 +27,12 @@ class MainActivity: FlutterActivity(){
                 sendBroadcast(intent)
                 result.success(null)
 
-
+            }  else if(call.method == "triggerUpdateWidget") {
+                val intent = Intent(this, PrayerWidgetProvider::class.java).apply {
+                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                }
+                sendBroadcast(intent)
+                result.success(null)
             } else {
                 result.notImplemented()
             }

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -78,17 +78,19 @@ class NotificationService {
   }
 
   static Future<void> updateDate(String? payload, int? id) async {
-    if (payload != null) {
-      PrefesUtils.getInstance();
-      List<String> part = payload.split('.');
-      int nextPrayerId = id ?? 0 + 1;
-      if (nextPrayerId > 5) {
-        nextPrayerId = 0;
-      }
-      PrefesUtils.setInt(PrefesUtils.currentPrayer, nextPrayerId);
-      String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
-      PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
+    if (payload == null) {
+      return;
     }
+    await PrefesUtils.getInstance();
+    List<String> part = payload.split('.');
+    int nextPrayerId = (id ?? 0) + 1;
+    if (nextPrayerId > 5) {
+      nextPrayerId = 0;
+    }
+    await PrefesUtils.setInt(PrefesUtils.currentPrayer, nextPrayerId);
+    String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
+    await PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
+    NativeBridge.triggerUpdate();
   }
 
   Future<List<PendingNotificationRequest>> getPendingNotification() async {
