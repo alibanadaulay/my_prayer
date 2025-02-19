@@ -22,7 +22,7 @@ class CreatePrayerNotification {
         time: time,
         isSound: await PrefesUtils.getBool(name),
         dateTime: prayerTime,
-        soundName: name == "Subuh" ? "fajr_adhan" : "adhan",
+        soundName: name == "Subuh" ? "fajr_adhan_mecca" : "adhan_mecca",
         name: name);
 
     await NotificationService.cancelNotificationById(id);

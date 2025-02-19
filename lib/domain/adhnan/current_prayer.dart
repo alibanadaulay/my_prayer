@@ -19,7 +19,6 @@ class GetCurrentPrayerUseCases {
         int.parse(targetTime.time.split(":")[0]),
         int.parse(targetTime.time.split(":")[1]),
       );
-      Logger().d("$now $target ${targetTime.name} ${prayers.length}");
 
       if (target.hour > now.hour ||
           (target.hour == now.hour && target.minute > now.minute)) {
@@ -27,6 +26,6 @@ class GetCurrentPrayerUseCases {
       }
     }
 
-    return prayers.last;
+    return prayers.first;
   }
 }

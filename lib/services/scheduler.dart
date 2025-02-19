@@ -105,8 +105,15 @@ void handlerWorkManager() async {
       switch (task) {
         case 'midnight_alarm':
           await onAlarmEverySixHourCallback(true);
+          break;
+        case 'timePrayer':
+          int id = inputData?["taskId"] ?? 0;
+          String? time = inputData?["time"];
+          await NotificationService.updateDate(time, id, true);
+          break;
         default:
           await alarmFirstDayAtNewMonth(true);
+          break;
       }
       return Future.value(true);
     } catch (e, stack) {
@@ -339,13 +346,39 @@ class Scheduler {
                 isSound: await PrefesUtils.getBool(item.name),
                 dateTime: prayerTime,
                 time: item.time,
-                soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
+                soundName:
+                    item.name == "Subuh" ? "fajr_adhan_mecca" : "adhan_mecca",
                 name: item.name);
         await NotificationService.scheduleAlarm(prayreNotificationModel);
+        await setWorkManagerForTimePrayer(prayreNotificationModel);
       }
     } catch (e) {
       Logger().e("_generateNotification $e");
     }
+  }
+
+  static Future<void> setWorkManagerForTimePrayer(
+      PrayreNotificationModel prayreNotificationModel) async {
+    DateTime now = DateTime.now();
+
+    DateTime target = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(prayreNotificationModel.time.split(":")[0]),
+      int.parse(prayreNotificationModel.time.split(":")[1]),
+    );
+
+    if (now.isAfter(target)) {
+      return;
+    }
+    await Workmanager().registerOneOffTask(
+        "oneOffTask-${prayreNotificationModel.id}", "timePrayer",
+        initialDelay: target.difference(now),
+        inputData: {
+          "taskId": prayreNotificationModel.id,
+          "time": prayreNotificationModel.time
+        });
   }
 
   static Future<void> getPrayerForOneMonth() async {

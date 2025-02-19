@@ -33,7 +33,7 @@ void onBackgroundNotificationResponse(NotificationResponse details) async {
   );
 
   try {
-    await NotificationService.updateDate(details.payload, details.id);
+    await NotificationService.updateDate(details.payload, details.id, false);
     FirebaseAnalytics.instance.logEvent(
       name: 'onBackgroundNotificationResponseSuccess',
       parameters: {
@@ -70,25 +70,32 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (details) {
-        updateDate(details.payload, details.id);
+        updateDate(details.payload, details.id, false);
       },
       onDidReceiveBackgroundNotificationResponse:
           onBackgroundNotificationResponse,
     );
   }
 
-  static Future<void> updateDate(String? payload, int? id) async {
+  static Future<void> updateDate(
+      String? payload, int? id, bool isFromWorkManager) async {
     if (payload == null) {
       return;
     }
     await PrefesUtils.getInstance();
-    List<String> part = payload.split('.');
+    String? time;
+    if (isFromWorkManager) {
+      time = payload;
+    } else {
+      List<String> part = payload.split('.');
+      time = part[1];
+    }
     int nextPrayerId = (id ?? 0) + 1;
     if (nextPrayerId > 5) {
       nextPrayerId = 0;
     }
     await PrefesUtils.setInt(PrefesUtils.currentPrayer, nextPrayerId);
-    String hijriDate = "${await CalenderUtils.getHijriDate(part[1])}H";
+    String hijriDate = "${await CalenderUtils.getHijriDate(time)}H";
     await PrefesUtils.setString(PrefesUtils.arabicDate, hijriDate);
     NativeBridge.triggerUpdate();
   }

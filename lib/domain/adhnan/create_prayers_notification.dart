@@ -36,7 +36,7 @@ class CreatePrayersNotification {
           isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
           time: item.time,
-          soundName: item.name == "Subuh" ? "fajr_adhan" : "adhan",
+          soundName: item.name == "Subuh" ? "fajr_adhan_mecca" : "adhan_mecca",
           name: item.name);
       NotificationService.scheduleAlarm(prayreNotificationModel);
     }
