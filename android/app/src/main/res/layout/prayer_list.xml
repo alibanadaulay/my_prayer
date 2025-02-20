@@ -9,6 +9,7 @@
     <TextView
         android:id="@+id/arabic_date"
         android:text="1 Hijriah"
+        android:fontFamily="@font/ubuntu_sans_extra_bold"
         android:layout_width="wrap_content"
         android:textColor="@color/title_widget"
         android:layout_marginBottom="16dp"
@@ -36,6 +37,8 @@
 
         <TextView
             android:id="@+id/fajr_title"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Subuh"
@@ -47,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
+            android:fontFamily="@font/ubuntu_sans_bold"
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
@@ -67,6 +71,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sunrise"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/title_prayer_size" />
 
@@ -75,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
-
+            android:fontFamily="@font/ubuntu_sans_bold"
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
@@ -96,6 +102,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dhuhr"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/title_prayer_size" />
 
@@ -104,6 +112,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
+            android:fontFamily="@font/ubuntu_sans_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
@@ -124,6 +134,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Asr"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/title_prayer_size" />
 
@@ -132,6 +144,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
+            android:fontFamily="@font/ubuntu_sans_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
@@ -152,6 +166,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Maghrib"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/title_prayer_size" />
 
@@ -160,6 +176,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
+            android:fontFamily="@font/ubuntu_sans_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
@@ -180,6 +198,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Isha"
+            android:fontFamily="@font/ubuntu_sans_semi_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/title_prayer_size" />
 
@@ -188,6 +208,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="05:00"
+            android:fontFamily="@font/ubuntu_sans_bold"
+
             android:textColor="@color/title_widget"
             android:textSize="@dimen/time_prayer_size"
             android:textStyle="bold" />
