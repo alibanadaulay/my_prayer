@@ -94,10 +94,7 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         themeMode: ThemeMode.system,
         darkTheme: AppTheme.darkTheme,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
         home: const MyHomePage(title: title));
   }
 }
