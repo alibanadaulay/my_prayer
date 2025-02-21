@@ -112,6 +112,14 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
+  static RawResourceAndroidNotificationSound? getSoundsResource(
+      String soundName, bool isSoundEnable) {
+    if (!isSoundEnable) {
+      return null;
+    }
+    return RawResourceAndroidNotificationSound(soundName);
+  }
+
   static Future<void> scheduleAlarm(
       PrayreNotificationModel prayerNotificationModel) async {
     tz.initializeTimeZones();
@@ -119,6 +127,7 @@ class NotificationService {
     if (DateTime.now().isAfter(prayerNotificationModel.dateTime)) {
       return;
     }
+
     List<PendingNotificationRequest> pendingNotifications =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
@@ -137,9 +146,9 @@ class NotificationService {
             autoCancel: true,
             enableVibration: prayerNotificationModel.isSound,
             playSound: prayerNotificationModel.isSound,
-            sound: RawResourceAndroidNotificationSound(
-                prayerNotificationModel.soundName),
-            icon: "@drawable/app_icon");
+            sound: getSoundsResource(prayerNotificationModel.soundName,
+                prayerNotificationModel.isSound),
+            icon: "@drawable/ic_my_prayer");
 
     NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);

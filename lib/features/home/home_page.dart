@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Container(
-          color: Colors.white38,
           child: body(),
         ),
       ),

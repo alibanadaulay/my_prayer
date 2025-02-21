@@ -14,6 +14,7 @@ import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
+import 'package:my_prayer/resources/theme.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/services/scheduler.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
@@ -92,13 +93,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Flutter Demo',
         themeMode: ThemeMode.system,
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple, brightness: Brightness.dark),
-          scaffoldBackgroundColor: Colors.black, // Dark mode background
-          appBarTheme: AppBarTheme(backgroundColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        darkTheme: AppTheme.darkTheme,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
