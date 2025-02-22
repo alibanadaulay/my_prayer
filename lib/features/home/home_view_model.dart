@@ -201,10 +201,8 @@ class HomeViewModel extends ChangeNotifier {
 
   void updateNotificationPrayer(
       int id, String name, bool isSound, String time) async {
-    if (isSound != await PrefesUtils.getBool(name)) {
       await PrefesUtils.setBool(name, isSound);
       _createPrayerNotification.createNotification(id, name, time);
-    }
   }
 
   void saveCityName() async {

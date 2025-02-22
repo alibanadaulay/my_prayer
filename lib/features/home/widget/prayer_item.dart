@@ -51,8 +51,8 @@ class _PrayerItemState extends State<PrayerItem> {
           onTap: () {
             showCustomDialog(
               context,
-              (bool newSound) async {
-                if (newSound == true) {
+              (newSound) async {
+                if (newSound) {
                   bool result = await PermissionUtils.requestNotification();
                   if (result) {
                     Scheduler.setWorkMangerThreeHour();

@@ -126,14 +126,14 @@ void handlerWorkManager() async {
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
-  static List<String> hours = ['00', '03', '06', '09', '12', '15', '18', '21'];
+  static List<String> hours = ['00', '06', '12','18',];
   static const String midnightAlarm = "midnight_alarm";
   static const String firstDayNewMonth = "firstDayNewMonth";
 
   static const int midnightAlarmId = 0;
   static const int firstDayNewMonthId = 1;
 
-  static const int _delaySetPrayerTme = 3;
+  static const int _delaySetPrayerTme = 6;
 
   static Workmanager? _workmanager;
 

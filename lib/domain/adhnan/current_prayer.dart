@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 
 class GetCurrentPrayerUseCases {
