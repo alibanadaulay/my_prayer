@@ -62,10 +62,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget _header() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.35,
+      height: MediaQuery.of(context).size.height * 0.40,
       decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("assets/masjid_dark.png"), fit: BoxFit.cover)),
+              image: AssetImage(Theme.of(context).brightness == Brightness.dark
+                  ? "assets/masjid_dark.png"
+                  : "assets/masjid_light.png"),
+              fit: BoxFit.fitWidth)),
       child: Column(
         children: [locationAndDateWidget(), currentPrayerWidget()],
       ),

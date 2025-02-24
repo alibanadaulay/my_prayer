@@ -95,10 +95,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       themeMode: ThemeMode.system,
       darkTheme: AppTheme.darkTheme,
-      theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: AppColor.lightPrimary,
-          hoverColor: AppColor.lightSecondary),
+      theme: AppTheme.lightTheme,
       home: const MyHomePage(title: title),
     );
   }
