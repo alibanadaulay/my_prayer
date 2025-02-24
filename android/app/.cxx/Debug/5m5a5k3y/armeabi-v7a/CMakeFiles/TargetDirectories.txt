@@ -1,0 +1,2 @@
+/Users/daulay/Projects/crossplatform/flutter/my_prayer/android/app/.cxx/Debug/5m5a5k3y/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/daulay/Projects/crossplatform/flutter/my_prayer/android/app/.cxx/Debug/5m5a5k3y/armeabi-v7a/CMakeFiles/rebuild_cache.dir

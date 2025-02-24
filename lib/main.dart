@@ -14,6 +14,7 @@ import 'package:my_prayer/domain/adhnan/today_prayers.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
 import 'package:my_prayer/features/home/home_page.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
+import 'package:my_prayer/resources/app_color.dart';
 import 'package:my_prayer/resources/theme.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/services/scheduler.dart';
@@ -91,10 +92,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     const String title = 'My Prayer';
     return MaterialApp(
-        title: 'Flutter Demo',
-        themeMode: ThemeMode.system,
-        darkTheme: AppTheme.darkTheme,
-        theme: AppTheme.lightTheme,
-        home: const MyHomePage(title: title));
+      title: 'Flutter Demo',
+      themeMode: ThemeMode.system,
+      darkTheme: AppTheme.darkTheme,
+      theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: AppColor.lightPrimary,
+          hoverColor: AppColor.lightSecondary),
+      home: const MyHomePage(title: title),
+    );
   }
 }

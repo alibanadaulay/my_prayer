@@ -15,6 +15,6 @@ class CalenderUtils {
     if (now.isAfter(maghribTime)) {
       todayHijri = HijriCalendar.fromDate(now.add(Duration(days: 1)));
     }
-    return todayHijri.toFormat("dd MM yyyy");
+    return todayHijri.toFormat("dd MMMM yyyy");
   }
 }

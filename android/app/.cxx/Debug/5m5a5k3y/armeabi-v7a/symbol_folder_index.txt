@@ -1,0 +1,1 @@
+/Users/daulay/Projects/crossplatform/flutter/my_prayer/build/app/intermediates/cxx/Debug/5m5a5k3y/obj/armeabi-v7a

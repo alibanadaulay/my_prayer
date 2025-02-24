@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:my_prayer/resources/app_color.dart';
 import 'package:my_prayer/services/scheduler.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
@@ -73,8 +74,8 @@ class _PrayerItemState extends State<PrayerItem> {
           },
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: _getBorderRadius(widget.isFirst, widget.isLast),
               color: getPrayerColor(context, widget.isNextPrayer),
+              borderRadius: _getBorderRadius(widget.isFirst, widget.isLast),
             ),
             child: Column(
               children: [
@@ -82,6 +83,9 @@ class _PrayerItemState extends State<PrayerItem> {
                   padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
                   child: _content(),
                 ),
+                Divider(
+                  height: 0.5,
+                )
               ],
             ),
           ),
@@ -112,17 +116,16 @@ class _PrayerItemState extends State<PrayerItem> {
         const SizedBox(width: 8),
         Text(
           widget.name,
-          style: const TextStyle(color: Colors.white, fontSize: 24.0),
+          style: const TextStyle(fontSize: 24.0),
         ),
         const Spacer(),
         Text(
           widget.time,
-          style: const TextStyle(color: Colors.white, fontSize: 24.0),
+          style: const TextStyle(fontSize: 24.0),
         ),
         const SizedBox(width: 8),
         FaIcon(
           isSound ? FontAwesomeIcons.volumeHigh : FontAwesomeIcons.volumeXmark,
-          color: Colors.white54,
           size: 24.0,
         ),
         const SizedBox(width: 8),
@@ -160,11 +163,8 @@ class _PrayerItemState extends State<PrayerItem> {
 
 Color getPrayerColor(BuildContext context, bool isNextPrayer) {
   if (isNextPrayer) {
-    return Theme.of(context).brightness == Brightness.dark
-        ? CupertinoColors.darkBackgroundGray // Dark mode color
-        : Colors.black54; // Light mode color
+    return Theme.of(context).cardColor;
+  } else {
+    return Theme.of(context).primaryColor;
   }
-  return Theme.of(context).brightness == Brightness.dark
-      ? Colors.black54
-      : Colors.white54; // Default color
 }

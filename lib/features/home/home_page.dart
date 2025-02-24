@@ -62,8 +62,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget _header() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.25,
-      color: Colors.blueAccent,
+      height: MediaQuery.of(context).size.height * 0.35,
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage("assets/masjid_dark.png"), fit: BoxFit.cover)),
       child: Column(
         children: [locationAndDateWidget(), currentPrayerWidget()],
       ),
@@ -94,22 +96,29 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 children: [
                   const FaIcon(
                     FontAwesomeIcons.locationDot,
-                    color: Colors.white54,
                     size: 24.0,
                   ),
                   const SizedBox(
                     width: 8.0,
                   ),
-                  dateText(
-                    homeViewModel.locationName,
-                  ),
+                  RichText(
+                    text: TextSpan(
+                        text: homeViewModel.locationName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
+                            .copyWith(letterSpacing: 1)),
+                  )
                 ],
               ),
             ),
             Container(
-              padding: EdgeInsets.only(top: 8.0, left: 24.0),
+              padding: EdgeInsets.only(left: 24.0),
               child: dateText(homeViewModel.arabicDate,
-                  textStyle: TextStyle(fontSize: 20)),
+                  textStyle: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w200)),
             ),
           ],
         ),
@@ -121,26 +130,44 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return Consumer<HomeViewModel>(
       builder: (context, homeViewModel, child) {
         return Container(
-          padding: EdgeInsets.only(top: 16.0),
+          margin: EdgeInsets.only(top: 32),
           child: Column(
             children: [
               RichText(
                 text: TextSpan(
                   text: homeViewModel.currenPrayer,
-                  style: const TextStyle(
-                      fontSize: 32.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white70),
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.bold, letterSpacing: 1.0),
                 ),
               ),
               SizedBox(
                 height: 8.0,
               ),
-              dateText(homeViewModel.timePrayer),
+              RichText(
+                text: TextSpan(
+                    text: homeViewModel.timePrayer,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(fontSize: 36.0)),
+              ),
               SizedBox(
                 height: 16.0,
               ),
-              dateText(homeViewModel.remainingTime),
+              Container(
+                padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                child: RichText(
+                  text: TextSpan(
+                      text: homeViewModel.remainingTime,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontSize: 24.0)),
+                ),
+              )
             ],
           ),
         );
@@ -153,43 +180,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       builder: (context, homeViewModel, child) {
         switch (homeViewModel.prayerListState) {
           case ViewState.loading:
-          // return Column(children: [
-          //   Shimmer(
-          //     duration: const Duration(seconds: 3),
-          //     interval: const Duration(seconds: 1),
-          //     color: Colors.white,
-          //     colorOpacity: 0.3,
-          //     enabled: true,
-          //     direction: const ShimmerDirection.fromLTRB(),
-          //     child: Container(
-          //       width: MediaQuery.of(context).size.width,
-          //       height: 48,
-          //       color: Colors.grey,
-          //     ),
-          //   ),
-          //   SizedBox(
-          //     height: 16.0,
-          //   ),
-          //   Shimmer(
-          //     duration: const Duration(seconds: 3),
-          //     interval: const Duration(seconds: 1),
-          //     color: Colors.white,
-          //     colorOpacity: 0.3,
-          //     enabled: true,
-          //     direction: const ShimmerDirection.fromLTRB(),
-          //     child: Container(
-          //       width: MediaQuery.of(context).size.width,
-          //       height: 48,
-          //       color: Colors.grey,
-          //     ),
-          //   ),
-          // ]);
           default:
             return Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              color: Colors.transparent,
               margin: const EdgeInsets.all(16.0),
               child: Padding(
                 padding: EdgeInsets.zero,
@@ -225,10 +220,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       text: TextSpan(
         text: value,
         style: textStyle ??
-            const TextStyle(
-                fontSize: 18.0,
-                color: Colors.white,
-                fontWeight: FontWeight.bold),
+            const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
       ),
     );
   }
