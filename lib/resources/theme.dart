@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_prayer/resources/app_color.dart';
 
 class AppTheme {
   static ThemeData darkTheme = ThemeData(

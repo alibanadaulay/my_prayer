@@ -126,7 +126,12 @@ void handlerWorkManager() async {
 class Scheduler {
   static String _city = "";
   static String _isoCity = "";
-  static List<String> hours = ['00', '06', '12','18',];
+  static List<String> hours = [
+    '00',
+    '06',
+    '12',
+    '18',
+  ];
   static const String midnightAlarm = "midnight_alarm";
   static const String firstDayNewMonth = "firstDayNewMonth";
 
@@ -183,7 +188,6 @@ class Scheduler {
 
   static Future<void> _generateMidnightAlarm(int midnightAlarmId) async {
     Duration initialDelay = await _getUntilMidnight();
-    DateTime now = DateTime.now();
 
     await workMangerThreeHours(initialDelay);
     await AndroidAlarmManager.periodic(
