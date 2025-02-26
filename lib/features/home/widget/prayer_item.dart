@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:my_prayer/features/home/widget/dialog_prayer_time.dart';
 import 'package:my_prayer/services/scheduler.dart';
 import 'package:my_prayer/utils/permission_utils.dart';
 import 'package:provider/provider.dart';
@@ -48,26 +49,29 @@ class _PrayerItemState extends State<PrayerItem> {
         return InkWell(
           borderRadius: _getBorderRadius(widget.isFirst, widget.isLast),
           onTap: () {
-            showCustomDialog(
-              context,
-              (newSound) async {
-                if (newSound) {
-                  bool result = await PermissionUtils.requestNotification();
-                  if (result) {
-                    Scheduler.setWorkMangerThreeHour();
-                    homeViewModel.updateNotificationPrayer(
-                        widget.id, widget.name, newSound, widget.time);
-                  } else {
-                    return;
-                  }
-                } else {
-                  homeViewModel.updateNotificationPrayer(
-                      widget.id, widget.name, newSound, widget.time);
-                }
-                setState(() {
-                  isSound = newSound;
-                });
-              },
+            showDialog(
+              context: context,
+              builder: (context) => DialogPrayerTime(
+                  onConfirm: (newSound) async {
+                    if (newSound) {
+                      bool result = await PermissionUtils.requestNotification();
+                      if (result) {
+                        Scheduler.setWorkMangerThreeHour();
+                        homeViewModel.updateNotificationPrayer(
+                            widget.id, widget.name, newSound, widget.time);
+                      } else {
+                        return;
+                      }
+                    } else {
+                      homeViewModel.updateNotificationPrayer(
+                          widget.id, widget.name, newSound, widget.time);
+                    }
+                    setState(() {
+                      isSound = newSound;
+                    });
+                  },
+                  isSound: isSound,
+                  prayerName: widget.name),
             );
           },
           child: Container(
@@ -128,33 +132,6 @@ class _PrayerItemState extends State<PrayerItem> {
         ),
         const SizedBox(width: 8),
       ],
-    );
-  }
-
-  void showCustomDialog(BuildContext context, Function(bool) confirm) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Notification'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                confirm(false); // Silent mode
-                Navigator.of(context).pop();
-              },
-              child: const Text('Silent'),
-            ),
-            TextButton(
-              onPressed: () {
-                confirm(true); // Azhan mode
-                Navigator.of(context).pop();
-              },
-              child: const Text('Azhan'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
