@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget _header() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.40,
+      height: MediaQuery.of(context).size.height * 0.45,
       decoration: BoxDecoration(
           image: DecorationImage(
               image: AssetImage(Theme.of(context).brightness == Brightness.dark

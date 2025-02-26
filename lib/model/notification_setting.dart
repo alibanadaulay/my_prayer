@@ -25,6 +25,6 @@ List<NotificationSetting> getListNotificationSetting() {
         id: 1,
         value: false,
         name: "Tanpa Suara",
-        iconData: FontAwesomeIcons.volumeOff)
+        iconData: FontAwesomeIcons.volumeXmark)
   ];
 }

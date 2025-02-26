@@ -1,4 +1,5 @@
 import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/resources/string.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 
@@ -22,7 +23,9 @@ class CreatePrayerNotification {
         time: time,
         isSound: await PrefesUtils.getBool(name),
         dateTime: prayerTime,
-        soundName: name == "Subuh" ? "fajr_adhan_mecca" : "adhan_mecca",
+        soundName: name == "Subuh"
+            ? StringResource.adhanFajrMeccaMp3
+            : StringResource.adhanMeccaMp3,
         name: name);
 
     await NotificationService.cancelNotificationById(id);

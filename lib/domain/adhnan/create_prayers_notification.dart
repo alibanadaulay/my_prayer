@@ -4,6 +4,7 @@ import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/prayer_time.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
+import 'package:my_prayer/resources/string.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 
@@ -36,7 +37,9 @@ class CreatePrayersNotification {
           isSound: await PrefesUtils.getBool(item.name),
           dateTime: prayerTime,
           time: item.time,
-          soundName: item.name == "Subuh" ? "fajr_adhan_mecca" : "adhan_mecca",
+          soundName: item.name == "Subuh"
+              ? StringResource.adhanFajrMeccaMp3
+              : StringResource.adhanMeccaMp3,
           name: item.name);
       NotificationService.scheduleAlarm(prayreNotificationModel);
     }

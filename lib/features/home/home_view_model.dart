@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:my_prayer/domain/adhnan/create_prayer_notification.dart';
 import 'package:my_prayer/domain/adhnan/create_prayers_notification.dart';
 import 'package:my_prayer/domain/adhnan/current_prayer.dart';
@@ -201,8 +202,10 @@ class HomeViewModel extends ChangeNotifier {
 
   void updateNotificationPrayer(
       int id, String name, bool isSound, String time) async {
-      await PrefesUtils.setBool(name, isSound);
-      _createPrayerNotification.createNotification(id, name, time);
+    await PrefesUtils.setBool(name, isSound);
+    bool result = await PrefesUtils.getBool(name);
+    Logger().d("$isSound, $result");
+    _createPrayerNotification.createNotification(id, name, time);
   }
 
   void saveCityName() async {
