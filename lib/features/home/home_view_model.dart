@@ -30,6 +30,8 @@ class HomeViewModel extends ChangeNotifier {
   String? _isoCountryCode = "";
   Placemark? _placemark;
   Timer? _remainingTimeTimer;
+  String _administrativeArea = "";
+  late Position _currentPosition;
 
   ViewState _prayerListState = ViewState.idle;
   ViewState get prayerListState => _prayerListState;
@@ -52,7 +54,8 @@ class HomeViewModel extends ChangeNotifier {
   void init() async {
     getHijriDate(null);
     await _setLocationName("");
-    _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "ID");
+    _getMonthPrayer.getMonthPrayer(locationName, _isoCountryCode ?? "IDN",
+        _administrativeArea, _currentPosition);
     _setupPrayer();
   }
 
@@ -65,8 +68,7 @@ class HomeViewModel extends ChangeNotifier {
     _prayerListState = ViewState.loading;
     notifyListeners();
     try {
-      prayerTimes = await _todayPrayer.getTodayPrayer(
-          locationName, _isoCountryCode ?? "-");
+      prayerTimes = await _todayPrayer.getTodayPrayer();
       await getHijriDate(prayerTimes[4].time);
       _prayerListState = ViewState.success;
       notifyListeners();
@@ -138,7 +140,9 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> _getPlaceMark(Position position) async {
     _placemark = await _permissionUtils.getCityName(position);
     if (_placemark != null) {
-      locationName = _placemark!.locality ?? "";
+      _currentPosition = position;
+      _administrativeArea = _placemark!.administrativeArea ?? "";
+      locationName = _placemark!.subAdministrativeArea ?? "";
       _isoCountryCode = _placemark!.isoCountryCode;
       saveCityName();
     }

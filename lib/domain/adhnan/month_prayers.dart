@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:my_prayer/common/adhan_dio.dart';
@@ -16,7 +17,8 @@ class GetMonthPrayer {
   String _city = "";
   String _isoCoutry = "";
 
-  Future<void> getMonthPrayer(String city, String isoCoutry) async {
+  Future<void> getMonthPrayer(String city, String isoCoutry,
+      String administrativeArea, Position position) async {
     _today = DateTime.now();
     _city = city;
     _isoCoutry = isoCoutry;
@@ -31,7 +33,9 @@ class GetMonthPrayer {
     await _box.clear();
 
     String adhanUrl =
-        "calendarByCity/${_today.year}/${_today.month}?city=$city&country=$isoCoutry&method=20&shafaq=general";
+        "calendar/${_today.year}/${_today.month}?latitude=${position.latitude}&longitude=${position.longitude}method=20&shafaq=general";
+
+    // "calendarByCity/${_today.year}/${_today.month}?city=$city&country=$isoCoutry&state=$administrativeArea&method=20&shafaq=general";
     final response = await _adhanClientDio.dio.get(adhanUrl);
     PrayerTimesMonthResponse data =
         PrayerTimesMonthResponse.fromJson(response.data);

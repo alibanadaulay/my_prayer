@@ -16,23 +16,18 @@ class GetTodayPrayer {
   final PermissionUtils _permissionUtils = PermissionUtils();
   final ConnectionUtils connectionUtil = ConnectionUtils();
 
-  Position? _position;
+  late Position _position;
   String _date = "";
-  String _country = "";
-  String _isoCoutry = "";
 
   GetTodayPrayer(this._adhanClientDio);
 
-  Future<List<PrayerTimeModel>> getTodayPrayer(
-      String country, String isCountryCode) async {
+  Future<List<PrayerTimeModel>> getTodayPrayer() async {
     Position? position = await _permissionUtils.getCurrentPosition();
     if (position == null) {
       return [];
     }
     _position = position;
     _date = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    _country = country;
-    _isoCoutry = isCountryCode;
 
     List<PrayerTimeModel> prayerTimesFromDbLocal = await _getFromLocalDb();
 
@@ -55,7 +50,7 @@ class GetTodayPrayer {
     final params = CalculationMethod.umm_al_qura.getParameters();
     params.madhab = Madhab.shafi;
     final prayerTimes = PrayerTimes.today(
-        Coordinates(_position!.latitude, _position!.longitude), params);
+        Coordinates(_position.latitude, _position.longitude), params);
 
     todayPrayer["Subuh"] = prayerTimes.fajr;
     todayPrayer["Sunrise"] = prayerTimes.sunrise;
@@ -85,7 +80,8 @@ class GetTodayPrayer {
   Future<List<PrayerTimeModel>> _getPrayersFromRemote() async {
     List<PrayerTimeModel> list = [];
     String adhanUrl =
-        "timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=20&shafaq=general";
+        "timings/$_date?latitude=${_position.latitude}&longitude=${_position.longitude}&method=20&shafaq=general";
+    // "timingsByCity/$_date?city=$_country&country=$_isoCoutry&method=20&shafaq=general";
     final response = await _adhanClientDio.dio.get(adhanUrl);
     PrayerTimesResponse prayerTime =
         PrayerTimesResponse.fromJson(response.data);
