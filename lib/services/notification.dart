@@ -1,51 +1,17 @@
 import 'dart:async';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:intl/intl.dart';
 import 'package:my_prayer/model/prayre_notification_model.dart';
 import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse details) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  String uuid = Uuid().v4();
-  String pattern = "dd-MM-yyyy hh:mm:ss";
-  final DateTime dateTime = DateTime.now();
-  FirebaseAnalytics.instance.logEvent(
-    name: 'onBackgroundNotificationResponseStart',
-    parameters: {
-      'payload': details.payload ?? 'unknown',
-      'notification_id': details.id.toString(),
-      'time': DateFormat(pattern).format(dateTime),
-      'uuid': uuid
-    },
-  );
-
-  try {
-    await NotificationService.updateDate(details.payload, details.id, false);
-    FirebaseAnalytics.instance.logEvent(
-      name: 'onBackgroundNotificationResponseSuccess',
-      parameters: {
-        'payload': details.payload ?? 'unknown',
-        'notification_id': details.id.toString(),
-        'time': DateFormat(pattern).format(dateTime),
-        'uuid': uuid
-      },
-    );
-  } catch (e, stack) {
-    FirebaseCrashlytics.instance.recordError(e, stack);
-  }
+  await NotificationService.updateDate(details.payload, details.id, false);
 }
 
 class NotificationService {
@@ -112,8 +78,8 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  static RawResourceAndroidNotificationSound? getSoundsResource(
-      String soundName, bool isSoundEnable) {
+  static Future<RawResourceAndroidNotificationSound?> getSoundsResource(
+      String soundName, bool isSoundEnable) async {
     if (!isSoundEnable) {
       return null;
     }
@@ -146,7 +112,7 @@ class NotificationService {
             autoCancel: true,
             enableVibration: prayerNotificationModel.isSound,
             playSound: prayerNotificationModel.isSound,
-            sound: getSoundsResource(prayerNotificationModel.soundName,
+            sound: await getSoundsResource(prayerNotificationModel.soundName,
                 prayerNotificationModel.isSound),
             icon: "@drawable/ic_my_prayer");
 

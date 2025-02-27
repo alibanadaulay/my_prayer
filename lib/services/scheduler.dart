@@ -2,10 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -21,86 +17,24 @@ import 'package:my_prayer/services/native_birdge.dart';
 import 'package:my_prayer/services/notification.dart';
 import 'package:my_prayer/utils/calender_utils.dart';
 import 'package:my_prayer/utils/prefes_utils.dart';
-import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 
 @pragma('vm:entry-point')
 Future<void> onAlarmEverySixHourCallback(bool fromWorkmanager) async {
-  if (!fromWorkmanager) {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
-  }
-  String uuid = Uuid().v4();
-  String pattern = "dd-MM-yyyy hh:mm:ss";
-  final DateTime dateTime = DateTime.now();
-
-  await FirebaseAnalytics.instance.logEvent(
-    name: 'onAlarmEverySixHourCallbackStart',
-    parameters: {
-      'time': DateFormat(pattern).format(dateTime),
-      'uuid': uuid,
-      'is_from_workmanager': fromWorkmanager.toString()
-    },
-  );
   await Scheduler.handleAlarmEverySixHour();
-  final DateTime lastTime = DateTime.now();
-
-  await FirebaseAnalytics.instance
-      .logEvent(name: 'onAlarmEverySixHourCallbackSuccess', parameters: {
-    'time': DateFormat(pattern).format(lastTime),
-    'uuid': uuid,
-    'is_from_workmanager': fromWorkmanager.toString()
-  });
 }
 
 @pragma('vm:entry-point')
 Future<void> alarmFirstDayAtNewMonth(bool fromWorkmanager) async {
-  if (!fromWorkmanager) {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
-  }
-  String uuid = Uuid().v4();
-  String pattern = "dd-MM-yyyy hh:mm:ss";
-  final DateTime dateTime = DateTime.now();
-
-  await FirebaseAnalytics.instance.logEvent(
-    name: 'alarmFirstDayAtNewMonthStart',
-    parameters: {
-      'time': DateFormat(pattern).format(dateTime),
-      'uuid': uuid,
-      'is_from_workmanager': fromWorkmanager.toString()
-    },
-  );
-
   try {
     await Scheduler.getPrayerForOneMonth();
-    final DateTime successDt = DateTime.now();
-    await FirebaseAnalytics.instance.logEvent(
-      name: 'alarmFirstDayAtNewMonthSuccess',
-      parameters: {
-        'time': DateFormat(pattern).format(successDt),
-        'uuid': uuid,
-        'is_from_workmanager': fromWorkmanager.toString()
-      },
-    );
   } finally {
     await Scheduler.setFirstDayAtMonth();
-    final DateTime successDt = DateTime.now();
-    await FirebaseAnalytics.instance.logEvent(
-      name: 'setFirstDayAtMonthAtFinally',
-      parameters: {
-        'time': DateFormat(pattern).format(successDt),
-        'uuid': uuid,
-        'is_from_workmanager': fromWorkmanager.toString()
-      },
-    );
   }
 }
 
 @pragma('vm:entry-point')
 void handlerWorkManager() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   Workmanager().executeTask((task, inputData) async {
     try {
       switch (task) {
@@ -118,7 +52,6 @@ void handlerWorkManager() async {
       }
       return Future.value(true);
     } catch (e, stack) {
-      await FirebaseCrashlytics.instance.recordError(e, stack);
       return Future.error(e);
     }
   });
