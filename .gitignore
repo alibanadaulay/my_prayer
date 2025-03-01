@@ -11,6 +11,8 @@
 .svn/
 .swiftpm/
 android/app/.cxx/
+android/app/google-service.json
+ios/Runner/GoogleService-Info.plist
 migrate_working_dir/
 
 # IntelliJ related
@@ -18,6 +20,7 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
+
 
 
 # The .vscode folder contains launch configuration and tasks you configure in
