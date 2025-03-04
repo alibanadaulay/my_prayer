@@ -1,4 +1,4 @@
-package com.example.my_prayer
+package com.zaim.my_prayer
 
 import android.appwidget.AppWidgetProvider
 import android.appwidget.AppWidgetManager

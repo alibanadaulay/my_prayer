@@ -11,9 +11,9 @@
 .svn/
 .swiftpm/
 android/app/.cxx/
-android/my_prayer.keystore
 android/app/google-service.json
-android/my_prayer.keystore
+android/app/my_prayer
+android/app/local.properties
 ios/Runner/GoogleService-Info.plist
 migrate_working_dir/
 

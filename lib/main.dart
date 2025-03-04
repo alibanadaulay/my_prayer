@@ -21,9 +21,10 @@ import 'package:my_prayer/utils/prefes_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:my_prayer/features/home/home_view_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  // await dotenv.load(fileName: "assets/.env");
+  await dotenv.load(fileName: "assets/.env");
 
   await init();
 
