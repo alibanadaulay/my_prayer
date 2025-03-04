@@ -97,7 +97,7 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.zaim.my_prayer.androidx-startup"
+            android:authorities="{applicationId}.androidx-startup"
             tools:replace="android:authorities"
             android:exported="false">
             <meta-data

@@ -52,22 +52,33 @@ android {
         versionName = flutter.versionName
     }
 
-    flavorDimensions += "default"
+    flavorDimensions += "variant"
 
     productFlavors {
         create("dev") {
             applicationIdSuffix = ".dev"
+            dimension = "variant"
         }
         create("prod") {
-            // No additional configuration for prod
+            dimension = "variant"
         }
     }
 
     buildTypes {
         getByName("debug") {
+            isMinifyEnabled = false
+            isDebuggable  = true
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
+            isMinifyEnabled = true
+            isDebuggable  = false
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("release")
         }
     }
