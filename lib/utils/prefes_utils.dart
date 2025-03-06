@@ -8,6 +8,7 @@ class PrefesUtils {
   static const String prayerTimes = "prayerTimes";
   static const String currentPrayer = "currentPrayer";
   static const String isWorkManagerThreeHour = "isWorkManagerThreeHour";
+  static const String isNeedReloadPrayerTime = "isNeedReloadPrayerTime";
 
   static PrefesUtils? _instance;
   static SharedPreferencesAsync? _preferences;

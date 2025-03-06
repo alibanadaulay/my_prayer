@@ -144,8 +144,16 @@ class HomeViewModel extends ChangeNotifier {
       _administrativeArea = _placemark!.administrativeArea ?? "";
       locationName = _placemark!.subAdministrativeArea ?? "";
       _isoCountryCode = _placemark!.isoCountryCode;
+      await _checkIfNeedReloadPrayerTimes();
       saveCityName();
     }
+  }
+
+  Future<void> _checkIfNeedReloadPrayerTimes() async {
+    String tempLocationName =
+        await PrefesUtils.getString(PrefesUtils.cityParam);
+    await PrefesUtils.setBool(
+        PrefesUtils.isNeedReloadPrayerTime, tempLocationName == locationName);
   }
 
   Future<void> _calculateCurrentTimeWithPrayerTime() async {

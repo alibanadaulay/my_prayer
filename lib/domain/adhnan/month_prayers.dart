@@ -5,6 +5,7 @@ import 'package:my_prayer/common/adhan_dio.dart';
 import 'package:my_prayer/model/db/db_config.dart';
 import 'package:my_prayer/model/db/prayer_db.dart';
 import 'package:my_prayer/model/json/prayer_times_month_response.dart';
+import 'package:my_prayer/utils/prefes_utils.dart';
 
 class GetMonthPrayer {
   final AdhanClientDio _adhanClientDio;
@@ -22,25 +23,27 @@ class GetMonthPrayer {
     _today = DateTime.now();
     _city = city;
     _isoCoutry = isoCoutry;
+
     _box = await Hive.openBox(PRAYER);
+    if (!await PrefesUtils.getBool(PrefesUtils.isNeedReloadPrayerTime)) {
+      bool result = await checkIfPrayersAvailable();
+      if (result) {
+        _box.close();
+        return;
+      }
 
-    bool result = await checkIfPrayersAvailable();
-    if (result) {
-      _box.close();
-      return;
+      await _box.clear();
     }
-
-    await _box.clear();
 
     String adhanUrl =
         "calendar/${_today.year}/${_today.month}?latitude=${position.latitude}&longitude=${position.longitude}method=20&shafaq=general";
 
-    // "calendarByCity/${_today.year}/${_today.month}?city=$city&country=$isoCoutry&state=$administrativeArea&method=20&shafaq=general";
     final response = await _adhanClientDio.dio.get(adhanUrl);
     PrayerTimesMonthResponse data =
         PrayerTimesMonthResponse.fromJson(response.data);
     await saveMonthPrayer(data);
     _box.close();
+    await PrefesUtils.setBool(PrefesUtils.isNeedReloadPrayerTime, false);
   }
 
   Future<bool> checkIfPrayersAvailable() async {
