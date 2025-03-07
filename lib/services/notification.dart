@@ -95,7 +95,8 @@ class NotificationService {
     }
 
     List<PendingNotificationRequest> pendingNotifications =
-        await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+        (await _flutterLocalNotificationsPlugin.pendingNotificationRequests())
+            .cast<PendingNotificationRequest>();
 
     for (var notification in pendingNotifications) {
       if (notification.id == prayerNotificationModel.id) {

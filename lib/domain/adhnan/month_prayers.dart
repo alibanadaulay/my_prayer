@@ -25,15 +25,16 @@ class GetMonthPrayer {
     _isoCoutry = isoCoutry;
 
     _box = await Hive.openBox(PRAYER);
-    if (!await PrefesUtils.getBool(PrefesUtils.isNeedReloadPrayerTime)) {
+    if (!(await PrefesUtils.getBool(PrefesUtils.isNeedReloadPrayerTime))) {
       bool result = await checkIfPrayersAvailable();
       if (result) {
-        _box.close();
+        await _box.close();
         return;
       }
 
-      await _box.clear();
+      await PrefesUtils.setBool(PrefesUtils.isNeedReloadPrayerTime, false);
     }
+    await _box.clear();
 
     String adhanUrl =
         "calendar/${_today.year}/${_today.month}?latitude=${position.latitude}&longitude=${position.longitude}method=20&shafaq=general";
@@ -42,8 +43,8 @@ class GetMonthPrayer {
     PrayerTimesMonthResponse data =
         PrayerTimesMonthResponse.fromJson(response.data);
     await saveMonthPrayer(data);
-    _box.close();
     await PrefesUtils.setBool(PrefesUtils.isNeedReloadPrayerTime, false);
+    await _box.close();
   }
 
   Future<bool> checkIfPrayersAvailable() async {
