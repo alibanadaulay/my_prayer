@@ -70,4 +70,32 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # Prevent obfuscation of model classes used by Gson
--keep class your.package.name.models.** { *; } # Replace with your package name
+-keep class com.zaim.my_prayer.models.** { *; } # Replace with your package name
+
+# Keep Flutter & AndroidX DataStore
+-keep class io.flutter.** { *; }
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+# Keep WorkManager (AndroidX Work Runtime)
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
+
+# Keep Play Core (for in-app updates, dynamic feature delivery)
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# Keep Orhanobut Hawk (Encrypted Key-Value Storage)
+-keep class com.orhanobut.hawk.** { *; }
+-dontwarn com.orhanobut.hawk.**
+
+# Keep Java 8 desugaring libraries
+-keep class j$.** { *; }
+-dontwarn j$.**
+
+# General AndroidX and Kotlin Coroutines
+-dontwarn kotlinx.coroutines.**
+-dontwarn androidx.lifecycle.**
+-dontwarn androidx.annotation.**
+-keep class **.mp3
+
